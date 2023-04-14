@@ -1,0 +1,6 @@
+# Commande de génération du dvi
+
+```
+latexmk --output-directory=postgres-operator postgres-operator.tex && dvipdf postgres-operator/postgres-operator.dvi
+```
+
