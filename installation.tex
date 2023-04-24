@@ -288,6 +288,22 @@ kubeadm join 10.10.10.30:6443 --token 6pia7c.n6u8pbm7yjl6nnr8 \
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Paramétrage de \textit{kubectl}}
+
+   L'utilisation de kubectl nécessite l'action suivante:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement de l'addon \textbf{CoreDNS}}
 
    Comme indiqué précédemment, les addons CoreDNS et Kube-Proxy n'ont pas été déployés au $1^{er}$ lancement de kubeadm.\\
@@ -317,14 +333,23 @@ linagora@debian-cp:~$ sudo kubeadm init phase addon kube-proxy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Déploiement de la couche réseau - \textbf{Container Network Interface}}
+\begin{frame}[fragile]{Choix de la couche réseau - \textbf{Container Network Interface}}
 
-   Il existe différentes plugins Kubernetes implémentant l'interface CNI.\\
-   Ces plugins sont listés dans l'URL suivante: \url{https://kubernetes.io/docs/concepts/cluster-administration/addons/}
+   Il existe différentes addons Kubernetes implémentant l'interface CNI.\\
+   Ces addons sont listés dans l'URL suivante: \url{https://kubernetes.io/docs/concepts/cluster-administration/addons/}\\
+   Pour le POC, l'addon sélectionné est Flannel car il semble être le plus simple et le plus basique des addons CNI.\\
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de l'addon \textit{Flannel}}
+
+   L'addon Flannel s'installe de plusieurs manières (\url{https://github.com/flannel-io/flannel#deploying-flannel-manually}).\\
+   La méthode utilisée pour le POC est kubectl:
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
-kubectl delete -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 \end{Verbatim}
 \end{tiny}
@@ -333,9 +358,19 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Installation de \textbf{k9s}}
+
+   Un outil pratique de visualisation d'un cluster kubernetes est: \textbf{k9s} (\url{https://k9scli.io/})\\
+   Le lien suivant permet de télécharger l'archive incluant le binaire: \url{https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement du n{\oe}ud \textbf{worker}}
 
-TODO
+
 
 \end{frame}
 
