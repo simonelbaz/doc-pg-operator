@@ -27,22 +27,313 @@
 
 \begin{frame}[fragile]{Déploiement du n{\oe}ud \textbf{control plane}}
 
-   Kubernetes s'appuie sur un élément essentiel qui est le \textit{container runtime}.
-   La méthode de déploiement du container runtime s'appuie la méthode décrite dans le lien: https://docs.docker.com/engine/install/debian/
+   \begin{itemize}
+      \item Kubernetes s'appuie sur un élément essentiel qui est le \textit{container runtime}.
+      \item La méthode de déploiement du container runtime s'appuie la méthode décrite dans le lien: \url{https://docs.docker.com/engine/install/debian/}
+   \end{itemize}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+\end{Verbatim}
+\end{tiny}
+
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Déploiement du n{\oe}ud \textbf{worker}}
+\begin{frame}[fragile]{Installation du runtine container \textit{containerd}}
 
-TODO
+Mise à jour de l'index du paquet \textit{apt} et installation des paquets nécessaires à l'utilisation des dépôts avec le protocole HTTPS:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+sudo apt-get update
+
+sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg
+
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Ajout de la clef GPG officielle de Docker}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=7,fragile]{Ajout du dépôt de Docker}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+  echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Installation de Docker Engine}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+   sudo apt-get update
+   sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=7,fragile]{Installation de \textbf{kubectl, kubeadm et kubelet}}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | \
+sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update
+sudo apt-get install -y kubectl
+sudo apt-get install -y kubeadm
+sudo apt-get install -y kubelet
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Activation des modules kernel \textit{overlay} et \textit{br\_netfilter}}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+linagora@debian-cp:/etc/modules-load.d$ cat k8s.conf 
+overlay
+br_netfilter
+linagora@debian-cp:/etc/modules-load.d$ pwd
+/etc/modules-load.d
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Activation des fonctions \textit{bridge/iptables} du \textit{forward} du kernel}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+linagora@debian-cp:/etc/sysctl.d$ cat k8s.conf 
+inet.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+linagora@debian-cp:/etc/sysctl.d$ pwd
+/etc/sysctl.d
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Paramétrage de containerd}
+
+Génération du paramétrage par défaut de containerd:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+root@debian-cp:~# containerd config \userinput{default} dump > /etc/containerd/config.toml.dmp
+\end{Verbatim}
+\end{tiny}
+
+Modifier la valeur à \textbf{true} pour le paramètre \textbf{SystemdCgroup}:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+  BinaryName = ""
+  CriuImagePath = ""
+  CriuPath = ""
+  CriuWorkPath = ""
+  IoGid = 0
+  IoUid = 0
+  NoNewKeyring = false
+  NoPivotRoot = false
+  Root = ""
+  ShimCgroup = ""
+  SystemdCgroup = \userinput{true}
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Paramétrage de containerd}
+
+Remplacer le paramétrage actuel par le paramétrage modifié:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+root@debian-cp:~# cp /etc/containerd/config.toml /etc/containerd/config.toml.bak
+root@debian-cp:~# cat /etc/containerd/config.toml.dmp > /etc/containerd/config.toml
+root@debian-cp:~# systemctl restart containerd
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Initialisation du cluster Kubernetes}
+
+En tant que root, lancer la commande suivante:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+# kubeadm init --control-plane-endpoint 10.10.10.30 \
+--skip-phases=addon/coredns,addon/kube-proxy \
+--v=5 \
+--pod-network-cidr="10.244.0.0/16"
+\end{Verbatim}
+\end{tiny}
+
+Si les phases \textit{addon/coredns} et \textit{addon/kube-proxy} ne sont pas évitées au $1^{er}$ lancement de kubeadm, l'erreur suivante est générée:
+
+\begin{toile}
+[kubelet-finalize] Updating "/etc/kubernetes/kubelet.conf" to point to a rotatable kubelet client certificate and key
+error execution phase addon/coredns: unable to fetch CoreDNS current installed version and ConfigMap.: rpc error: code = Unknown desc = malformed header: missing HTTP content-type
+To see the stack trace of this error execute with --v=5 or higher
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=7,fragile]{Initialisation du cluster Kubernetes}
+
+Le résultat de la commande d'init est le suivant:
+
+\begin{toile}
+
+I0315 01:06:38.342010   34405 kubeletfinalize.go:134] [kubelet-finalize] Restarting the kubelet to enable client certificate rotation\\
+\\
+Your Kubernetes control-plane has initialized successfully!\\
+\\
+To start using your cluster, you need to run the following as a regular user:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+\end{Verbatim}
+\end{tiny}
+
+Alternatively, if you are the root user, you can run:\\
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+\end{Verbatim}
+\end{tiny}
+
+You should now deploy a pod network to the cluster.\\
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:\\
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of control-plane nodes by copying certificate authorities
+and service account keys on each node and then running the following as root:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+  kubeadm join 10.10.10.30:6443 --token 6pia7c.n6u8pbm7yjl6nnr8 \
+        --discovery-token-ca-cert-hash sha256:f6d45602ea75c7659dc91f661d19e97e6817e2847e4e5d0047880b871317a145 \
+        --control-plane 
+\end{Verbatim}
+\end{tiny}
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+kubeadm join 10.10.10.30:6443 --token 6pia7c.n6u8pbm7yjl6nnr8 \
+        --discovery-token-ca-cert-hash sha256:f6d45602ea75c7659dc91f661d19e97e6817e2847e4e5d0047880b871317a145 
+\end{Verbatim}
+\end{tiny}
+
+\end{toile}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de l'addon \textbf{CoreDNS}}
+
+   Comme indiqué précédemment, les addons CoreDNS et Kube-Proxy n'ont pas été déployés au $1^{er}$ lancement de kubeadm.\\
+   CoreDNS peut maintenant être déployé sans erreur:\\
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ sudo kubeadm init phase addon coredns
+[addons] Applied essential addon: CoreDNS
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de l'addon \textbf{Kube-Proxy}}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ sudo kubeadm init phase addon kube-proxy
+[addons] Applied essential addon: kube-proxy
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[fragile]{Déploiement de la couche réseau - \textbf{Container Network Interface}}
+
+   Il existe différentes plugins Kubernetes implémentant l'interface CNI.\\
+   Ces plugins sont listés dans l'URL suivante: \url{https://kubernetes.io/docs/concepts/cluster-administration/addons/}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+kubectl delete -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement du n{\oe}ud \textbf{worker}}
 
 TODO
 
