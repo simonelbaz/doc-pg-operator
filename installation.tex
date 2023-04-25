@@ -6,7 +6,7 @@
 
 \begin{figure}
 \begin{center}
-\includegraphics[angle=0, width=0.5\textwidth]{images/architecture.eps}
+\includegraphics[angle=0, width=\textwidth]{images/architecture.eps}
 \end{center}
 \end{figure}
 
@@ -363,6 +363,32 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/
    Un outil pratique de visualisation d'un cluster kubernetes est: \textbf{k9s} (\url{https://k9scli.io/})\\
    Le lien suivant permet de télécharger l'archive incluant le binaire: \url{https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz}
 
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Liste des namespaces}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ kubectl get namespaces
+NAME              STATUS   AGE
+default           Active   40d
+kube-flannel      Active   39d
+kube-node-lease   Active   40d
+kube-public       Active   40d
+kube-system       Active   40d
+minio-operator    Active   32d
+rook-ceph         Active   32d
+\end{Verbatim}
+\end{tiny}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{namespaces.eps}
+\end{center}
+\end{figure}
 
 \end{frame}
 
