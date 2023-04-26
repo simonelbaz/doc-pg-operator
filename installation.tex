@@ -394,6 +394,133 @@ rook-ceph         Active   32d
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Pods du namespace default}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ kubectl get pods          
+NAME                                    READY   STATUS    RESTARTS   AGE
+acid-test-cluster-0                     1/1     Running   0          27d
+acid-test-cluster-1                     1/1     Running   0          27d
+postgres-operator-fcbd7cc96-ndpj8       1/1     Running   0          40d
+postgres-operator-ui-5579cc7779-86rqk   1/1     Running   0          40d
+\end{Verbatim}
+\end{tiny}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{pod-default-ns.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Pods du namespace kube-system}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ kubectl get pods -n kube-system
+NAME                                READY   STATUS    RESTARTS           AGE
+coredns-787d4945fb-8ph9v            1/1     Running   0                  40d
+coredns-787d4945fb-9jrzs            1/1     Running   0                  40d
+etcd-debian-cp                      1/1     Running   158                41d
+kube-apiserver-debian-cp            0/1     Running   4968 (13m ago)     41d
+kube-controller-manager-debian-cp   1/1     Running   4161 (8m26s ago)   41d
+kube-proxy-4mfn8                    1/1     Running   0                  33d
+kube-proxy-9h4c6                    1/1     Running   0                  27d
+kube-proxy-9j47t                    1/1     Running   0                  33d
+kube-proxy-s78vx                    1/1     Running   0                  33d
+kube-proxy-wpwt4                    1/1     Running   0                  40d
+kube-proxy-xjs5q                    1/1     Running   1 (33d ago)        41d
+kube-scheduler-debian-cp            1/1     Running   2848 (6m20s ago)   41d
+\end{Verbatim}
+\end{tiny}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{pod-kube-system.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Pods du namespace kube-flannel}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ kubectl get pods -n kube-flannel                                                                                                                                        
+NAME                    READY   STATUS    RESTARTS      AGE                                                                                                                                   
+kube-flannel-ds-5nw2j   1/1     Running   0             33d                                                                                                                                   
+kube-flannel-ds-5xwsm   1/1     Running   0             40d                                                                                                                                   
+kube-flannel-ds-8vkg9   1/1     Running   1 (33d ago)   40d                                                                                                                                   
+kube-flannel-ds-pv6ss   1/1     Running   0             27d                                                                                                                                   
+kube-flannel-ds-trbz9   1/1     Running   0             33d                                                                                                                                   
+kube-flannel-ds-wmzz2   1/1     Running   0             33d
+\end{Verbatim}
+\end{tiny}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{flannel.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=0.9]{Pods du namespace rook-ceph}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+linagora@debian-cp:~$ kubectl get pods -n rook-ceph
+NAME                                                        READY   STATUS                 RESTARTS           AGE
+csi-cephfsplugin-9nbts                                      2/2     Running                1 (27d ago)        27d
+csi-cephfsplugin-bpxlw                                      2/2     Running                0                  33d
+csi-cephfsplugin-jd5x8                                      2/2     Running                0                  33d
+csi-cephfsplugin-mddkf                                      2/2     Running                0                  33d
+csi-cephfsplugin-nrmfz                                      2/2     Running                0                  33d
+csi-cephfsplugin-provisioner-84cc595b78-9mml4               5/5     Running                6008 (2m44s ago)   33d
+csi-cephfsplugin-provisioner-84cc595b78-9twnq               5/5     Running                2171               33d
+csi-rbdplugin-92zlq                                         2/2     Running                0                  33d
+csi-rbdplugin-c95w7                                         2/2     Running                0                  33d
+csi-rbdplugin-pk57s                                         2/2     Running                1 (27d ago)        27d
+csi-rbdplugin-provisioner-6f6b6b8cd6-4c8jd                  1/5     CreateContainerError   1344               33d
+csi-rbdplugin-provisioner-6f6b6b8cd6-gw6bm                  1/5     CreateContainerError   4465               33d
+csi-rbdplugin-srtfz                                         2/2     Running                0                  33d
+csi-rbdplugin-v6gqm                                         2/2     Running                0                  33d
+rook-ceph-crashcollector-dnumcephworker1-7845bb8ff-vs9fx    1/1     Running                0                  32d
+rook-ceph-crashcollector-dnumcephworker2-75cdf95dcd-n5xsz   1/1     Running                0                  33d
+rook-ceph-crashcollector-dnumcephworker3-6fddb6cd9-x45w5    1/1     Running                1 (8d ago)         32d
+rook-ceph-mgr-a-c5db58dff-hvsp9                             3/3     Running                1487 (6d6h ago)    33d
+rook-ceph-mgr-b-7bbfd88c8b-wh4ww                            2/3     CreateContainerError   944                22d
+rook-ceph-mon-a-75cf9ccddc-b2jgc                            2/2     Running                1163               33d
+rook-ceph-mon-b-78d6586d5-qss4z                             1/2     CreateContainerError   701 (19d ago)      19d
+rook-ceph-mon-c-64dcb4c86c-wz8sg                            2/2     Running                1755               33d
+rook-ceph-operator-cf4f7dfd4-6tm6p                          1/1     Running                0                  32d
+rook-ceph-osd-0-57d9b8db4d-d6dhr                            1/2     CreateContainerError   484                32d
+rook-ceph-osd-1-74698f77fd-6n2mh                            1/2     Running                529                32d
+rook-ceph-osd-2-5cc486467c-lhm47                            1/2     Running                1116 (49m ago)     32d
+rook-ceph-osd-prepare-dnumcephworker1-rnk78                 0/1     Completed              0                  21d
+rook-ceph-osd-prepare-dnumcephworker3-42rxv                 0/1     Completed              0                  21d
+rook-ceph-tools-7c4b8bb9b5-pxk67                            1/1     Running                0                  33d
+\end{Verbatim}
+\end{tiny}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{pod-rook-ceph.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement du n{\oe}ud \textbf{worker}}
 
 
