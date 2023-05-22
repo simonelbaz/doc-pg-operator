@@ -594,9 +594,133 @@ dnumworker1   NotReady   <none>          53s   v1.26.2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[shrink=8,fragile]{Terminologie du stockage dans k8s}
+
+\begin{itemize}
+   \item Le stockage permanent des données s'appuie les volumes persistants (PV) (\url{https://kubernetes.io/docs/concepts/storage/persistent-volumes/})
+   \item Un PV est un espace de stockage mis à disposition par k8s.
+   \item Il peut être alloué manuellement ou dynamiquement par l'intermédiaire des storage class (\url{https://kubernetes.io/docs/concepts/storage/storage-classes/})
+   \item Les PV sont l'équivalent d'un node dans un cluster.
+   \item Les persistentVolumeClaim (PVC) sont l'équivalent d'un pod.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement du stockage - \textbf{Rook Ceph}}
 
-   WIP
+\begin{itemize}
+   \item Le storage class sur lequel s'appuie l'opérateur PostgreSQL est Ceph
+   \item L'opérateur k8s \textbf{Rook Ceph} facilite le déploiement de Ceph
+   \item Le déploiement s'appuie sur le lien \url{https://rook.io/docs/rook/v1.9/quickstart.html}
+   \item La version de l'opérateur utilisée est la v1.9
+   \item Elle supporte les versions k8s v1.17+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Prérequis au déploiement de l'opérateur - \textbf{Rook Ceph}}
+
+\begin{itemize}
+   \item Le déploiement de l'opérateur scanne l'ensemble des noeuds de stockage pour vérifier la présence de:
+   \begin{itemize}
+      \item des devices bruts (sans partitions ou filesystems formattés)
+      \item des partitions brutes (sans filesystems formattés)
+      \item les volumes physiques initialisés par LVM
+   \end{itemize}
+\end{itemize}
+
+L'exemple ci-dessous indique comment vérifier la disponibilité d'espace pour l'opérateur Rook Ceph:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+lsblk -f
+
+    NAME                  FSTYPE      LABEL UUID                                   MOUNTPOINT
+    vda
+    |-vda1                LVM2_member       >eSO50t-GkUV-YKTH-WsGq-hNJY-eKNf-3i07IB
+     |-ubuntu--vg-root   ext4              c2366f76-6e21-4f10-a8f3-6776212e2fe4   /
+     |-ubuntu--vg-swap_1 swap              9492a3dc-ad75-47cd-9596-678e8cf17ff9   [SWAP]
+    vdb
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Prérequis au déploiement de l'opérateur - \textbf{Rook Ceph}}
+
+\begin{itemize}
+   \item Dans l'exemple précédent, si la colonne \textit{FSTYPE} est renseignée, cela indique la présence d'un filesystem
+   \item La partition vdb n'est pas formatée avec un filesystem: elle est donc utilisable par l'opérateur Rook Ceph
+   \item Le paquet \textbf{lvm2} est une dépendance importante de Rook Ceph
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de l'opérateur \textbf{Rook Ceph}}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ git clone --single-branch --branch v1.9.2 https://github.com/rook/rook.git
+cd rook/deploy/examples
+kubectl create -f crds.yaml -f common.yaml -f operator.yaml
+kubectl create -f cluster.yaml
+\end{Verbatim}
+\end{tiny}
+
+\begin{itemize}
+   \item Une fois le cluster est opérationnel, il devient possible de créer:
+   \begin{itemize}
+      \item stockage bloc
+      \item stockage objet
+      \item stockage fichier
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Vérification de l'opérateur \textbf{Rook Ceph}}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# verify the rook-ceph-operator is in the `Running` state before proceeding
+kubectl -n rook-ceph get pod
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Le contrôleur d'admission (Admission Controller) - \textbf{Rook Ceph}}
+
+\begin{itemize}
+   \item Il est recommandé de déployer le contrôleur d'admission: il permet de vérifier que Rook est correctement paramétré grâce aux réglages des Customer Resources (CR)
+   \item L'Admission Controller intercepte les requêtes à destination de l'API k8s avant l'objet persistant après les phases d'authentification et d'autorisation
+   \item Pour installer l'Admission Controller, lancer les requêtes suivantes:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.1/cert-manager.yaml
+\end{Verbatim}
+\end{tiny}
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Affichage des storage class déployés}
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
