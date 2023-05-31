@@ -32,12 +32,6 @@
       \item La méthode de déploiement du container runtime s'appuie la méthode décrite dans le lien: \url{https://docs.docker.com/engine/install/debian/}
    \end{itemize}
 
-\begin{tiny}
-\begin{Verbatim}[commandchars=\\\{\}]
-\end{Verbatim}
-\end{tiny}
-
-
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -664,7 +658,121 @@ lsblk -f
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Sélection des n\oe{}uds sur lesquels \textbf{Ceph} sera déployé}
+
+   L'opérateur Rook Ceph offre la possibilité de sélectionner les n\oe{}uds sur lesquels le stockage Ceph est déployé.\\
+   Pour cela, il s'appuie sur la notion de label.\\
+   Dans le cadre du POC, les 3 n\oe{}uds suivants sont sélectionnés pour porter le stockage:
+\begin{itemize}
+   \item dnumcephworker1
+   \item dnumcephworker2
+   \item dnumcephworker3
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=7,fragile]{Affectation des labels sur les n\oe{}uds de stockage}
+
+   Depuis le control plane, lancer les commandes suivantes:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl label nodes dnumcephworker1 role=storage-node
+node/dnumcephworker1 labeled
+$ kubectl label nodes dnumcephworker2 role=storage-node
+node/dnumcephworker2 labeled
+$ kubectl label nodes dnumcephworker3 role=storage-node
+node/dnumcephworker3 labeled
+$ kubectl get nodes --show-labels
+NAME              STATUS   ROLES           LABELS
+dnumcephworker1   Ready    <none>          kubernetes.io/hostname=dnumcephworker1,kubernetes.io/os=linux,\textbf{role=storage-node}
+dnumcephworker2   Ready    <none>          kubernetes.io/hostname=dnumcephworker2,kubernetes.io/os=linux,\textbf{role=storage-node}
+dnumcephworker3   Ready    <none>          kubernetes.io/hostname=dnumcephworker3,kubernetes.io/os=linux,\textbf{role=storage-node}
+\end{Verbatim}
+\end{tiny}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=5,fragile]{Paramétrage pour la répartition du stockage Ceph sur les n\oe{}uds labelisés}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+~/rook$ git diff
+diff --git a/deploy/examples/cluster.yaml b/deploy/examples/cluster.yaml
+index 9bd50ec97..fef3f777f 100644
+--- a/deploy/examples/cluster.yaml
++++ b/deploy/examples/cluster.yaml
+@@ -154,22 +154,22 @@ spec:
+   # To control where various services will be scheduled by kubernetes, use the placement configuration sections below.
+   # The example under 'all' would have all services scheduled on kubernetes nodes labeled with 'role=storage-node' and
+   # tolerate taints with a key of 'storage-node'.
+-  # placement:
+-  #   all:
+-  #     nodeAffinity:
+-  #       requiredDuringSchedulingIgnoredDuringExecution:
+-  #         nodeSelectorTerms:
+-  #         - matchExpressions:
+-  #           - key: role
+-  #             operator: In
+-  #             values:
+-  #             - storage-node
+-  #     podAffinity:
+-  #     podAntiAffinity:
+-  #     topologySpreadConstraints:
+-  #     tolerations:
+-  #     - key: storage-node
+-  #       operator: Exists
++  placement:
++    all:
++      nodeAffinity:
++        requiredDuringSchedulingIgnoredDuringExecution:
++          nodeSelectorTerms:
++          - matchExpressions:
++            - key: role
++              operator: In
++              values:
+\textbf{+              - storage-node}
++      podAffinity:
++      podAntiAffinity:
++      topologySpreadConstraints:
++      tolerations:
++      - key: storage-node
++        operator: Exists
+   # The above placement information can also be specified for mon, osd, and mgr components
+   #   mon:
+   # Monitor deployments may contain an anti-affinity rule for avoiding monitor
+\end{Verbatim}
+\end{tiny}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Paramétrage pour la répartition du stockage Ceph sur les n\oe{}uds labelisés}
+
+   La directive \textit{nodeSelectorTerms} permet de sélectionner les noeuds portant la storageclass Ceph
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
++          nodeSelectorTerms:
+\ldots
+\textbf{+              - storage-node}
++      podAffinity:
++      podAntiAffinity:
+\end{Verbatim}
+\end{tiny}
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement de l'opérateur \textbf{Rook Ceph}}
+
+   Comme indiqué dans le lien \url{https://rook.io/docs/rook/v1.9/quickstart.html}, l'application des commandes ci-dessous amorce le déploiement de l'opérateur:
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -737,7 +845,10 @@ rook-ceph-block   rook-ceph.rbd.csi.ceph.com     Delete          Immediate      
 
 \begin{frame}[fragile]{Déploiement de l'opérateur \textbf{PostgreSQL} de Zalando}
 
-TODO
+Le storage class est maintenant déployé.\\
+Il devient possible d'appliquer l'opérateur PostgreSQL.\\
+
+
 
 \end{frame}
 
