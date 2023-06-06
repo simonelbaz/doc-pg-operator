@@ -36,6 +36,36 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Désactivation permanente de la mémoire \textbf{swap}}
+
+   Le process kubelet ne démarre pas en cas de mémoire swap activée.\\
+   Pour désactiver l'utilisation de la swap, merci d'utiliser la commande suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+swapoff -a
+\end{Verbatim}
+\end{tiny}
+
+   Pour persister cet état et faire en sorte que la mémoire swap ne soit pas activée au prochain reboot, supprimer ou mettre en commentaires la ligne suivante dans \textit{/etc/fstab}:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ sudo cat /etc/fstab 
+/dev/mapper/dnumworker1--vg-root /               ext4    errors=remount-ro 0       1
+# /boot was on /dev/sda1 during installation
+UUID=ddd6fd9d-6ac3-4510-9156-22984bc82b67 /boot           ext2    defaults        0       2
+\textbf{#/dev/mapper/dnumworker1--vg-swap_1 none            swap    sw              0       0}
+/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+
+\end{Verbatim}
+\end{tiny}
+
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Installation du runtine container \textit{containerd}}
 
 Mise à jour de l'index du paquet \textit{apt} et installation des paquets nécessaires à l'utilisation des dépôts avec le protocole HTTPS:
@@ -675,7 +705,7 @@ lsblk -f
 
 \begin{frame}[shrink=7,fragile]{Affectation des labels sur les n\oe{}uds de stockage}
 
-   Depuis le control plane, lancer les commandes suivantes:
+   Depuis le control plane, lancer les commandes suivantes pour marquer les n\oe{}uds:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 $ kubectl label nodes dnumcephworker1 role=storage-node
@@ -684,6 +714,12 @@ $ kubectl label nodes dnumcephworker2 role=storage-node
 node/dnumcephworker2 labeled
 $ kubectl label nodes dnumcephworker3 role=storage-node
 node/dnumcephworker3 labeled
+\end{Verbatim}
+\end{tiny}
+
+   Affichage du label des n\oe{}uds:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
 $ kubectl get nodes --show-labels
 NAME              STATUS   ROLES           LABELS
 dnumcephworker1   Ready    <none>          kubernetes.io/hostname=dnumcephworker1,kubernetes.io/os=linux,\textbf{role=storage-node}
@@ -784,7 +820,7 @@ kubectl create -f cluster.yaml
 \end{tiny}
 
 \begin{itemize}
-   \item Une fois le cluster est opérationnel, il devient possible de créer:
+   \item Une fois le cluster opérationnel, il devient possible de créer:
    \begin{itemize}
       \item stockage bloc
       \item stockage objet
@@ -796,12 +832,47 @@ kubectl create -f cluster.yaml
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Vérification de l'opérateur \textbf{Rook Ceph}}
+\begin{frame}[shrink=5,fragile]{Vérification de l'opérateur \textbf{Rook Ceph}}
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 # verify the rook-ceph-operator is in the `Running` state before proceeding
 kubectl -n rook-ceph get pod
+NAME                                                        READY   STATUS                 RESTARTS         AGE
+csi-cephfsplugin-9nbts                                      2/2     Running                1 (63d ago)      63d
+csi-cephfsplugin-bpxlw                                      2/2     Running                0                69d
+csi-cephfsplugin-jd5x8                                      2/2     Running                0                69d
+csi-cephfsplugin-mddkf                                      2/2     Running                0                69d
+csi-cephfsplugin-nrmfz                                      2/2     Running                0                69d
+csi-cephfsplugin-provisioner-84cc595b78-9mml4               5/5     Running                6523 (28d ago)   69d
+csi-cephfsplugin-provisioner-84cc595b78-9twnq               5/5     Running                3908 (30d ago)   69d
+csi-rbdplugin-92zlq                                         2/2     Running                0                69d
+csi-rbdplugin-c95w7                                         2/2     Running                0                69d
+csi-rbdplugin-pk57s                                         2/2     Running                1 (63d ago)      63d
+csi-rbdplugin-provisioner-6f6b6b8cd6-4c8jd                  5/5     Terminating            2919 (29d ago)   69d
+csi-rbdplugin-provisioner-6f6b6b8cd6-d4t56                  0/5     Pending                0                4d10h
+csi-rbdplugin-provisioner-6f6b6b8cd6-gw6bm                  1/5     CreateContainerError   4465             69d
+csi-rbdplugin-srtfz                                         2/2     Running                0                69d
+csi-rbdplugin-v6gqm                                         2/2     Running                0                69d
+rook-ceph-crashcollector-dnumcephworker1-7845bb8ff-vs9fx    1/1     Running                0                68d
+rook-ceph-crashcollector-dnumcephworker2-75cdf95dcd-ljkqd   0/1     Pending                0                4d10h
+rook-ceph-crashcollector-dnumcephworker2-75cdf95dcd-n5xsz   1/1     Terminating            0                69d
+rook-ceph-crashcollector-dnumcephworker3-6fddb6cd9-x45w5    1/1     Running                2                68d
+rook-ceph-mgr-a-c5db58dff-fpp7z                             2/3     CrashLoopBackOff       146 (28d ago)    30d
+rook-ceph-mgr-a-c5db58dff-hvsp9                             2/3     Terminating            3115 (30d ago)   69d
+rook-ceph-mgr-b-7bbfd88c8b-jdg4p                            0/3     Pending                0                4d10h
+rook-ceph-mgr-b-7bbfd88c8b-wh4ww                            2/3     Terminating            2283 (28d ago)   58d
+rook-ceph-mon-a-75cf9ccddc-b2jgc                            2/2     Running                1500 (31d ago)   69d
+rook-ceph-mon-c-64dcb4c86c-wz8sg                            2/2     Running                1808 (28d ago)   69d
+rook-ceph-operator-cf4f7dfd4-6tm6p                          1/1     Running                0                68d
+rook-ceph-osd-0-57d9b8db4d-d6dhr                            1/2     Terminating            731 (28d ago)    68d
+rook-ceph-osd-0-57d9b8db4d-vmtjp                            0/2     Pending                0                4d10h
+rook-ceph-osd-1-74698f77fd-6n2mh                            1/2     Running                716 (30d ago)    68d
+rook-ceph-osd-2-5cc486467c-lhm47                            1/2     Running                1172 (28d ago)   68d
+rook-ceph-osd-prepare-dnumcephworker1-rnk78                 0/1     Completed              0                57d
+rook-ceph-osd-prepare-dnumcephworker3-42rxv                 0/1     Completed              0                57d
+rook-ceph-tools-7c4b8bb9b5-8tf8r                            0/1     Pending                0                4d10h
+rook-ceph-tools-7c4b8bb9b5-pxk67                            1/1     Terminating            0                68d
 \end{Verbatim}
 \end{tiny}
 
@@ -830,12 +901,87 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7
 
 \begin{frame}[fragile]{Affichage des storage class déployés}
 
+   Le storageclass déployé a pour nom \textbf{rook-ceph-block}.
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 linagora@debian-cp:~$ kubectl get storageclass
 NAME              PROVISIONER                    RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
 local-storage     kubernetes.io/no-provisioner   Delete          WaitForFirstConsumer   false                  12d
-rook-ceph-block   rook-ceph.rbd.csi.ceph.com     Delete          Immediate              true                   5d23h
+\textbf{rook-ceph-block}   rook-ceph.rbd.csi.ceph.com     Delete          Immediate              true                   5d23h
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Sélection des n\oe{}uds \textbf{PostgreSQL}}
+
+   De manière similaire à l'opérateur Rook Ceph, il est possible de sélectionner les n\oe{}uds portant le pod PostgreSQL en se basant sur les labels Kubernetes.\\
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=5,fragile]{Marquage des n\oe{}uds \textbf{PostgreSQL}}
+
+   Les commandes ci-dessous marquent les n\oe{}uds destinés à porter les pods PostgreSQL:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl label nodes dnumworker1 postgres-operator=enabled
+node/dnumworker1 labeled
+$ kubectl label nodes dnumworker2 postgres-operator=enabled
+node/dnumworker2 labeled
+$ kubectl get nodes --show-labels
+NAME              STATUS   ROLES           LABELS
+dnumworker1   Ready    <none>          kubernetes.io/hostname=dnumworker1,kubernetes.io/os=linux,\textbf{postgres-operator=enabled}
+dnumworker2   Ready    <none>          kubernetes.io/hostname=dnumworker2,kubernetes.io/os=linux,\textbf{postgres-operator=enabled}
+\end{Verbatim}
+\end{tiny}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[shrink=5,fragile]{Répartitions des pods \textbf{PostgreSQL} sur les n{\oe}uds worker et choix du storageClass}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ git diff
+diff --git a/manifests/complete-postgres-manifest.yaml b/manifests/complete-postgres-manifest.yaml
+index 8d197a75..56b32c34 100644
+--- a/manifests/complete-postgres-manifest.yaml
++++ b/manifests/complete-postgres-manifest.yaml
+@@ -57,7 +57,7 @@ spec:
+ 
+   volume:
+     size: 1Gi
+-#    storageClass: my-sc
+\textbf{+    storageClass: rook-ceph-block}
+ #    iops: 1000  # for EBS gp3
+ #    throughput: 250  # in MB/s for EBS gp3
+ #    selector:
+@@ -203,14 +203,14 @@ spec:
+ 
+ # Add node affinity support by allowing postgres pods to schedule only on nodes that
+ # have label: "postgres-operator:enabled" set.
+-#  nodeAffinity:
+-#    requiredDuringSchedulingIgnoredDuringExecution:
+-#      nodeSelectorTerms:
+-#        - matchExpressions:
+-#            - key: postgres-operator
+-#              operator: In
+-#              values:
+-#                - enabled
++  nodeAffinity:
++    requiredDuringSchedulingIgnoredDuringExecution:
++      nodeSelectorTerms:
++        - matchExpressions:
+\textbf{+            - key: postgres-operator}
++              operator: In
++              values:
++                - enabled
+ 
+ # Enables change data capture streams for defined database tables
+ #  streams:
 \end{Verbatim}
 \end{tiny}
 
@@ -847,16 +993,110 @@ rook-ceph-block   rook-ceph.rbd.csi.ceph.com     Delete          Immediate      
 
 Le storage class est maintenant déployé.\\
 Il devient possible d'appliquer l'opérateur PostgreSQL.\\
-
-
+Le lien suivant décrit les commandes à appliquer:\\
+\tiny{\url{https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#deployment-options}}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Répartitions des pods \textbf{PostgreSQL} sur les n{\oe}uds worker}
+\begin{frame}[fragile]{Clonage du dépôt de l'opérateur}
+   
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+git clone https://github.com/zalando/postgres-operator.git
+cd postgres-operator
+\end{Verbatim}
+\end{tiny}
 
-TODO
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Application des différents manifestes}
+   
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+kubectl create -f manifests/configmap.yaml  # configuration
+kubectl create -f manifests/operator-service-account-rbac.yaml  # identity and permissions
+kubectl create -f manifests/postgres-operator.yaml  # deployment
+kubectl create -f manifests/api-service.yaml  # operator API to be used by UI
+\end{Verbatim}
+\end{tiny}
+
+   Pour information, il existe également des chart Helm pour facilier le déploiement.
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès à l'interface web}
+   
+   Pour activer l'accès à l'interface web de l'opérateur PostgreSQL, veuillez la commande suivante sur le n\oe{}ud control plane:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ kubectl port-forward svc/postgres-operator-ui 8081:80
+Forwarding from 127.0.0.1:8081 -> 8081
+Forwarding from [::1]:8081 -> 8081
+
+\end{Verbatim}
+\end{tiny}
+
+   Elle redirige le flux TCP du port 80 du control plane vers le port TCP 8081 du service postgres-operator-ui
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès à l'interface web}
+   
+   Pour accéder à l'interface web de l'opérateur PostgreSQL depuis le PC de l'utilisateur, il est possible de passer par une redirection SSH:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+ssh -L 9090:10.106.57.137:80 dgfip-k8s
+\end{Verbatim}
+\end{tiny}
+
+   Lancer le navigateur pour accéder à l'URL \url{http://localhost:9090/#new}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Interface web de l'opérateur PostgreSQL}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/postgres-operator-ui.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Fonctionnalités proposées par l'interface web de l'opérateur PostgreSQL}
+
+L'UI permet de:
+\begin{itemize}
+   \item choisir la version PostgreSQL (jusquà la version 15 actuellement)
+   \item le nombre d'instances
+   \item activation du load-balancer
+   \item activation du pool de connexions à la base
+   \item activation du locad-balancer pour le pool de connexions à la base
+   \item taille du volume persistent alloué à la base de données
+   \item choix du storageClass
+   \item performances IO
+   \item choix des ressources (demandées et limites) CPU et RAM allouées
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Utilisation de la commande en ligne pour la création d'un cluster PostgreSQL}
+
+Les fonctionnalités proposées par l'UI sont également disponibles par la commande en ligne.
 
 \end{frame}
 
