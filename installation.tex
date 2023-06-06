@@ -25,6 +25,18 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Prérequis matériels}
+
+   \begin{itemize}
+      \item etcd est la base de données clé-valuers centrale utilisée par Kubernetes
+      \item etcd utilise de manière intensive les disques à disposition
+      \item Pour une stabilité accrue du cluster, il est préférable d'utiliser des disques de type \textbf{SSD}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement du n{\oe}ud \textbf{control plane}}
 
    \begin{itemize}
@@ -1096,7 +1108,43 @@ L'UI permet de:
 
 \begin{frame}[fragile]{Utilisation de la commande en ligne pour la création d'un cluster PostgreSQL}
 
-Les fonctionnalités proposées par l'UI sont également disponibles par la commande en ligne.
+   \begin{itemize}
+      \item Les fonctionnalités proposées par l'UI sont également disponibles par la commande en ligne.
+      \item Le manifeste \textit{manifests/complete-postgresql-manifest.yaml} permet de préciser l'ensemble des paramètres proposés par l'UI.
+      \item Pour appliquer ce manifeste \textit{manifests/complete-postgresql-manifest.yaml}, la commande suivante est lancée sur le n\oe{}ud:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+kubectl create -f manifests/complete-postgresql-manifest.yaml
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Vérification de l''état du cluster PostgreSQL}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+$ kubectl get pods -l application=spilo -L spilo-role
+NAME                  READY   STATUS    RESTARTS   AGE   SPILO-ROLE
+acid-test-cluster-0   1/1     Running   0          12m   
+acid-test-cluster-1   1/1     Running   0          10m   
+$ kubectl get postgresql
+NAME                TEAM   VERSION   PODS   VOLUME   CPU-REQUEST   MEMORY-REQUEST   AGE   STATUS
+acid-test-cluster   acid   15        2      1Gi      10m           100Mi            68d   Running
+$ kubectl get pods -l application=spilo -L spilo-role
+NAME                  READY   STATUS    RESTARTS   AGE   SPILO-ROLE
+acid-test-cluster-0   1/1     Running   0          13m   
+acid-test-cluster-1   1/1     Running   0          10m   
+$ kubectl get svc -l application=spilo -L spilo-role
+NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SPILO-ROLE
+acid-test-cluster          ClusterIP   10.103.247.68   <none>        5432/TCP   68d   master
+acid-test-cluster-config   ClusterIP   None            <none>        <none>     68d   
+acid-test-cluster-repl     ClusterIP   10.100.95.205   <none>        5432/TCP   68d   replica
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
