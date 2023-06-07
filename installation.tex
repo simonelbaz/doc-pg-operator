@@ -25,6 +25,26 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Dimensionnement des serveurs}
+
+   Dimensionnement du control plane:
+
+   \begin{itemize}
+      \item 8 CPU
+      \item 8 Go RAM
+   \end{itemize}
+
+   Dimensionnement des workers:
+
+   \begin{itemize}
+      \item 2 CPU
+      \item 2 Go RAM
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Prérequis matériels}
 
    \begin{itemize}
@@ -1123,7 +1143,7 @@ kubectl create -f manifests/complete-postgresql-manifest.yaml
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Vérification de l''état du cluster PostgreSQL}
+\begin{frame}[fragile]{Vérification de l'état du cluster PostgreSQL}
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\{\}]
@@ -1145,6 +1165,54 @@ acid-test-cluster-config   ClusterIP   None            <none>        <none>     
 acid-test-cluster-repl     ClusterIP   10.100.95.205   <none>        5432/TCP   68d   replica
 \end{Verbatim}
 \end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de l'opérateur Minio}
+
+   WIP
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès client à la base de données}
+
+   WIP
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Point-in-time recovery PITR}
+
+   WIP
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Failover - Changement du nombre de pods}
+
+   WIP
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Mise à jour mineure de PostgreSQL}
+
+   WIP
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Mise à jour majeure de PostgreSQL}
+
+   WIP
 
 \end{frame}
 
