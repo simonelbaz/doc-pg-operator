@@ -1170,9 +1170,61 @@ acid-test-cluster-repl     ClusterIP   10.100.95.205   <none>        5432/TCP   
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Déploiement de \textbf{krew}}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de \textbf{krew}}
+
+   Ajout du répertoire des binaires du paquet krew dans \textbf{.bashrc} ou \textbf{.zshrc}:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+\end{Verbatim}
+\end{tiny}
+
+Redémarrer le shell.\\
+Pour vérifier le déploiement correct de krew, lancer la commande suivante:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+kubectl krew
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement de l'opérateur Minio}
 
-   WIP
+   Le déploiement de Minio s'appuie sur l'opérateur Minio.\\
+   Son déploiement est décrit dans le lien suivant \url{https://operator.min.io/#architecture}.\\
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+kubectl krew update
+kubectl krew install minio
+\end{Verbatim}
+\end{tiny}
+
 
 \end{frame}
 
