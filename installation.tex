@@ -160,12 +160,16 @@ sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[shrink=7,fragile]{Installation de \textbf{kubectl, kubeadm et kubelet}}
+\begin{frame}[fragile,shrink=0.9]{Installation de \textbf{kubectl, kubeadm et kubelet}}
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
-sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | \
+sudo apt-get install -y ca-certificates curl
+sudo apt-get install -y apt-transport-https
+sudo apt-get update
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] \
+https://apt.kubernetes.io/ kubernetes-xenial main" | \
 sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 sudo apt-get update
@@ -1115,7 +1119,7 @@ L'UI permet de:
    \item le nombre d'instances
    \item activation du load-balancer
    \item activation du pool de connexions à la base
-   \item activation du locad-balancer pour le pool de connexions à la base
+   \item activation du load-balancer pour le pool de connexions à la base
    \item taille du volume persistent alloué à la base de données
    \item choix du storageClass
    \item performances IO
@@ -1225,6 +1229,209 @@ kubectl krew install minio
 \end{Verbatim}
 \end{tiny}
 
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Vérification de l'état de l'opérateur Minio}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl get pods -n minio-operator
+NAME                              READY   STATUS    RESTARTS           AGE
+console-56f9795d5c-59fsx          1/1     \textbf{Running}   1 (33d ago)        82d
+minio-operator-7cd6784f59-5c52w   1/1     \textbf{Running}   5 (23h ago)        17d
+minio-operator-7cd6784f59-m7h8x   1/1     \textbf{Running}   2320 (3d16h ago)   82d
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès à la console Minio}
+
+   La commande suivante ouvre un accès de type proxy à la console Minio:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ kubectl minio proxy -n minio-operator
+Starting port forward of the Console UI.
+
+To connect open a browser and go to http://localhost:9090
+
+Current JWT to login: *****
+
+Forwarding from 0.0.0.0:9090 -> 9090
+Handling connection for 9090
+
+\end{Verbatim}
+\end{tiny}
+
+Depuis le terminal de l'utilisateur, lancer la commande suivante:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ ssh -L 9090:localhost:9090 dgfip-k8s
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès à la console Minio}
+
+   Dans le champ \textit{Enter JWT}, renseigner la valeur du token JWT renvoyé par la commande précédente:
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/login_console_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Dashboard Minio}
+
+   Le tableau de bord de Minio ressemble à ceci:
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.8\textheight]{images/console_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Setup - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.8\textheight]{images/setup_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Configure - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.8\textheight]{images/configure_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Marquage des n\oe{}uds Minio}
+
+   Depuis le control plane, lancer les commandes suivantes pour marquer les n\oe{}uds:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl label nodes dnumminioworker1 role=s3-node
+node/dnumminioworker1 labeled
+$ kubectl label nodes dnumminioworker2 role=s3-node
+node/dnumminioworker2 labeled
+$ kubectl label nodes dnumminioworker3 role=s3-node
+node/dnumminioworker3 labeled
+$ kubectl label nodes dnumminioworker4 role=s3-node
+node/dnumminioworker4 labeled
+\end{Verbatim}
+\end{tiny}
+
+   Affichage du label des n\oe{}uds:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl get nodes --show-labels
+NAME               STATUS   ROLES           AGE    VERSION   LABELS
+\ldots
+dnumminioworker1   Ready    <none>          6h2m   v1.27.2   \ldots,\textbf{role=s3-node}
+dnumminioworker2   Ready    <none>          142m   v1.27.2   \ldots,\textbf{role=s3-node}
+dnumminioworker3   Ready    <none>          109m   v1.27.2   \ldots,\textbf{role=s3-node}
+dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role=s3-node}
+\ldots
+
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Pod placement - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/pod_placement.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Choix d'un fournisseur d'identité - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/identity_provider_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Sécurité - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/security_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Chiffrement - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/encryption_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Log d'audit - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/auditlog_minio.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Création d'un tenant - Supervision - Minio}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.9\textwidth, height=0.9\textheight]{images/monitoring_minio.eps}
+\end{center}
+\end{figure}
 
 \end{frame}
 
