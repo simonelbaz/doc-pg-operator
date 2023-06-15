@@ -5,6 +5,8 @@
 % @IMP@ \usepackage{pgfpages}
 % @IMP@ \pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
 
+%\PassOptionsToPackage{hyphens,spaces}{url}
+%\def\UrlBreaks{\do\-\do\#\do\(\do\[\do\{\do\<\do\:\do\/}
 \usepackage{fixltx2e}
 
 \usepackage[english,french]{babel}
@@ -27,15 +29,16 @@
 \usepackage{tikz}
 \usepackage{xspace}
 \usepackage{fancyvrb}
+\usepackage{mdframed}
 \usepackage{tcolorbox}
 \usepackage{listings}
-\usepackage{hyperref}
 \usepackage{spverbatim}
 
 \newcommand\userinput[1]{\textbf{#1}}
 \usepackage{tgcursor}
+\usepackage{xurl}
 
-\usepackage{formation}
+%\usepackage{formation}
 
 % beamer
 %\setbeamertemplate{itemize/enumerate body begin}{\large}
