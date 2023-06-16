@@ -1466,9 +1466,52 @@ dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Utilisation de container en mode rootless dans OpenShift}
+\begin{frame}[shrink=7,fragile]{Utilisation de container en mode rootless dans OpenShift}
 
-   L'URL suivante décrit la problèmatique d'utilisation de container dans un environnement rootless: \url{https://docs.bitnami.com/tutorials/running-non-root-containers-on-openshift}
+   L'URL suivante décrit la problèmatique d'utilisation de container dans un environnement rootless: \\
+   \begin{tiny}
+   \url{https://docs.bitnami.com/tutorials/running-non-root-containers-on-openshift} \\
+   \end{tiny}
+   Cette page fournit également un lien intéressant sur la sécurisation d'un cluster Kubernetes en se basant sur les \textbf{Pod Security Policies}.\\
+   Le lien est le suivant: \\
+   \begin{tiny}
+   \url{https://docs.bitnami.com/tutorials/secure-kubernetes-cluster-psp/}.
+   \end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Pod Security Policies}
+
+   Comme indiqué dans \url{https://kubernetes.io/docs/concepts/security/pod-security-policy/}, les PSP sont dépréciés.\\
+   Ils sont maintenant remplacés par \textbf{Pod Security Admission} \url{https://kubernetes.io/docs/concepts/security/pod-security-admission/}.
+   La norme \textit{Pod Security Admission} définit la notion de \textit{Security Context} décrite dans le lien suivant:
+   \url{https://kubernetes.io/docs/tasks/configure-pod-container/security-context/}
+   C'est cette notion qui va permet d'approcher au plus près les condictions de run d'un cluster Openshift 
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Security Context}
+
+   Par défaut, l'opérateur PostgreSQL de Zalando applique les mesures de sécurité suivantes:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+securityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+\end{Verbatim}
+\end{tiny}
+
+\begin{itemize}
+   \item Il ne tourne pas avec un identifiant privilégié ni le compte root
+   \item Il s'appuie sur des filesystems en lecture seule
+\end{itemize}
 
 \end{frame}
 

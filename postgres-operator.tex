@@ -1,12 +1,15 @@
 %\documentclass[aspectratio=43]{beamer}
 %\documentclass[aspectratio=1610]{beamer}
+\RequirePackage[hyphens]{url}
 \documentclass[aspectratio=169]{beamer}
 
 % @IMP@ \usepackage{pgfpages}
 % @IMP@ \pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
 
-%\PassOptionsToPackage{hyphens,spaces}{url}
-%\def\UrlBreaks{\do\-\do\#\do\(\do\[\do\{\do\<\do\:\do\/}
+%\PassOptionsToPackage{T1,hyphens,spaces}{url}
+\PassOptionsToPackage{hyphens,colorlinks,urlcolor=blue}{hyperref}\usepackage{hyperref}
+%\usepackage[T1,hyphens,spaces]{url}
+%\def\UrlBreaks{\do\-\do\#\do\<\do\:\do\/}
 \usepackage{fixltx2e}
 
 \usepackage[english,french]{babel}
@@ -36,7 +39,6 @@
 
 \newcommand\userinput[1]{\textbf{#1}}
 \usepackage{tgcursor}
-\usepackage{xurl}
 
 %\usepackage{formation}
 
@@ -48,7 +50,7 @@
 \usetheme[progressbar=frametitle]{metropolis}
 
 \title{PostgreSQL}
-\subtitle{Déploiement de l'opérateur PostgreSQL}
+\subtitle{Déploiement de l'opérateur PostgreSQL de Zalando}
 \author{Simon ELBAZ (selbaz@linagora.com)}
 \date{27 février 2023}
 
