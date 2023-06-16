@@ -1494,9 +1494,10 @@ dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Security Context}
+\begin{frame}[fragile]{Opérateur - Security Context}
 
-   Par défaut, l'opérateur PostgreSQL de Zalando applique les mesures de sécurité suivantes:
+   Par défaut, l'opérateur PostgreSQL de Zalando applique les mesures de sécurité suivantes.\\
+   Extrait de manifests/postgres-operator.yaml:
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
@@ -1512,6 +1513,28 @@ securityContext:
    \item Il ne tourne pas avec un identifiant privilégié ni le compte root
    \item Il s'appuie sur des filesystems en lecture seule
 \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Pods PostgreSQL - Security Context}
+
+   Il est possible d'affecter:
+\begin{itemize}
+   \item un utilisateur non privilégié
+   \item un groupe non privilégié au pod.
+   \item un groupe de filesystem défini
+\end{itemize}
+
+   Extrait de manifests/complete-postgres-manifest.yaml:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+  spiloRunAsUser: 101
+  spiloRunAsGroup: 103
+  spiloFSGroup: 103
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
