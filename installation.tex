@@ -1614,6 +1614,59 @@ $:~/spilo/postgres-appliance$ docker build --tag dnum-test .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Login avec la CLI d'ArgoCD}
+La commande suivante permet de récupérer le mot de passe initial de l'admin d'ArgoCD:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\#\#]
+linagora@debian-cp:~$ argocd admin initial-password -n argocd
+*******************
+
+ This password must be only used for first time login. We strongly recommend you update the password using `argocd account update-password`.
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Login avec la CLI d'ArgoCD}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl get svc -n argocd
+NAME                                      TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+argocd-applicationset-controller          ClusterIP      10.109.27.242    <none>        7000/TCP,8080/TCP            6d16h
+argocd-dex-server                         ClusterIP      10.100.63.110    <none>        5556/TCP,5557/TCP,5558/TCP   6d16h
+argocd-metrics                            ClusterIP      10.102.19.237    <none>        8082/TCP                     6d16h
+argocd-notifications-controller-metrics   ClusterIP      10.102.70.229    <none>        9001/TCP                     6d16h
+argocd-redis                              ClusterIP      10.104.253.209   <none>        6379/TCP                     6d16h
+argocd-repo-server                        ClusterIP      10.111.28.234    <none>        8081/TCP,8084/TCP            6d16h
+\textbf{argocd-server                             LoadBalancer   10.109.47.144    <pending>     80:30235/TCP,443:30885/TCP   6d16h}
+argocd-server-metrics                     ClusterIP      10.98.167.31     <none>        8083/TCP                     6d16h
+linagora@debian-cp:~$ argocd login 10.109.47.144
+WARNING: server certificate had error: x509: cannot validate certificate for 10.109.47.144 because it doesn't contain any IP SANs. Proceed insecurely (y/n)? y
+Username: admin
+Password: 
+'admin:login' logged in successfully
+Context '10.109.47.144' updated
+
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Guestbook - ArgoCD}
+
+   ArgoCD s'appuie sur un \textit{guestbook} pour piloter un déploiement dans un cluster k8s.
+   Un exemple de guestbook est disponible à l'URL suivante: \url{https://github.com/argoproj/argocd-example-apps.git}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Intégration avec ArgoCD}
 
    WIP
