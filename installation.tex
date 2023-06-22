@@ -1658,18 +1658,22 @@ Context '10.109.47.144' updated
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Guestbook - ArgoCD}
+\begin{frame}[fragile]{Kustomize \& ArgoCD}
 
-   ArgoCD s'appuie sur un \textit{guestbook} pour piloter un déploiement dans un cluster k8s.
-   Un exemple de guestbook est disponible à l'URL suivante: \url{https://github.com/argoproj/argocd-example-apps.git}
+\begin{itemize}
+   \item ArgoCD est capable de s'interfacer avec Kustomize \url{https://kustomize.io/}.
+   \item Zalando met à disposition un script Yaml \textbf{manifests/kustomization.yaml}
+   \item Ce dernier facilite le déploiement de l'opérateur dans l'environnement k8s
+   \item Une page synthétisant l'utilisation de Kustomize est disponible à l'URL suivante: \url{https://kubectl.docs.kubernetes.io/guides/introduction/kustomize/}
+\end{itemize}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Intégration avec ArgoCD}
+\begin{frame}[fragile]{Intégration CI/CD \& ArgoCD}
 
-   WIP
+   Le lien suivant décrit l'intégration d'un outil de CI/CD et ArgoCD. \url{https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/}
 
 \end{frame}
 
