@@ -1663,6 +1663,18 @@ Context '10.109.47.144' updated
 \begin{itemize}
    \item ArgoCD est capable de s'interfacer avec Kustomize \url{https://kustomize.io/}.
    \item Zalando met à disposition un script Yaml \textbf{manifests/kustomization.yaml}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+$ cat kustomization.yaml 
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- configmap.yaml
+- operator-service-account-rbac.yaml
+- postgres-operator.yaml
+- api-service.yaml
+\end{Verbatim}
+\end{tiny}
    \item Ce dernier facilite le déploiement de l'opérateur dans l'environnement k8s
    \item Une page synthétisant l'utilisation de Kustomize est disponible à l'URL suivante: \url{https://kubectl.docs.kubernetes.io/guides/introduction/kustomize/}
 \end{itemize}
@@ -1693,8 +1705,8 @@ Context '10.109.47.144' updated
    \item La 1\iere{} étape de la phase de patch est de récupérer le dépôt du projet:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\@\@]
-git clone https://github.com/mycompany/guestbook-config.git
-cd guestbook-config
+git clone https://github.com/zalando/postgres-operator
+cd postgres-operator
 \end{Verbatim}
 \end{tiny}
    \item Il devient possible de patcher avec la commande \textbf{kustomize} ou la commande \textbf{kubectl}
@@ -1706,17 +1718,61 @@ cd guestbook-config
       kustomize edit set image mycompany/guestbook:v2.0
       \end{Verbatim}
       \end{tiny}
-         \item Patch avec kubectl:
+      \item Cette méthode n'a pas été explorée
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Phase de patch avec \textbf{kubectl}}
+
+\begin{itemize}
+   \item On liste dans un $1\ier{}$ temps l'ensemble des ConfigMaps:
       \begin{tiny}
       \begin{Verbatim}[commandchars=\&\{\}]
-      # plain yaml
-      kubectl patch --local \
-      -f config-deployment.yaml \
-      -p '{"spec":{"template":{"spec":{"containers":[{"name":"guestbook","image":"mycompany/guestbook:v2.0"}]}}}}' \
-      -o yaml
+$ kubectl get configmaps
+NAME                DATA   AGE
+kube-root-ca.crt    1      98d
+postgres-operator   59     97d
       \end{Verbatim}
       \end{tiny}
-   \end{itemize}
+
+   \item Pour lister la ConfigMap qui définit l'image \textbf{spilo} déployée:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl get configmap postgres-operator -o yaml
+apiVersion: v1               
+data:               
+  api_port: "8080"     
+\ldots
+  \textbf{docker_image: ghcr.io/zalando/spilo-15:2.1-p9}
+\ldots
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2023-03-16T22:20:28Z"
+  name: postgres-operator
+  namespace: default
+\ldots
+\end{Verbatim}
+\end{tiny}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Phase de patch avec \textbf{kubectl}}
+
+   La version de l'image spilo est modifiée:
+\begin{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+   kubectl patch --local -f configmap.yaml -p '{"data":{"docker_image":"ghcr.io/zalando/spilo-15:2.1-p10"}}' -o yaml > configmap.yaml.new
+   mv configmap.yaml.new configmap.yaml
+\end{Verbatim}
+\end{tiny}
 \end{itemize}
 
 \end{frame}
@@ -1726,7 +1782,13 @@ cd guestbook-config
 \begin{frame}[fragile]{Phase de sync \& ArgoCD}
 
 \begin{itemize}
-   \item Comme indiqué dans la documentation ArgoCD, il est préférable de télécharger systématiquement la derniere version du client \textbf{argo}
+   \item Une fois la modification réalisée, il est nécessaire de la pusher vers le dépôt sur lequel se synchronise ArgoCD
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+git add . -m "Mise à jour de l'image"
+git push
+\end{Verbatim}
+\end{tiny}
    \item Lancer ensuite les commandes suivantes dans le pipeline de la CI:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
