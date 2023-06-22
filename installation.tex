@@ -1673,7 +1673,71 @@ Context '10.109.47.144' updated
 
 \begin{frame}[fragile]{Intégration CI/CD \& ArgoCD}
 
-   Le lien suivant décrit l'intégration d'un outil de CI/CD et ArgoCD. \url{https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/}
+\begin{itemize}
+   \item Le lien suivant décrit l'intégration d'un outil de CI/CD et ArgoCD. \url{https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/}
+   \item Globalement la mise à jour d'un cluster k8s par l'intermédiaire d'ArgoCD se déroule en 2 phases:
+   \begin{itemize}
+      \item récupération du dépôt git
+      \item la phase de patch
+      \item la phase de sync
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Phase de patch \& ArgoCD}
+
+\begin{itemize}
+   \item La 1\iere{} étape de la phase de patch est de récupérer le dépôt du projet:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\@\@]
+git clone https://github.com/mycompany/guestbook-config.git
+cd guestbook-config
+\end{Verbatim}
+\end{tiny}
+   \item Il devient possible de patcher avec la commande \textbf{kustomize} ou la commande \textbf{kubectl}
+   \begin{itemize}
+         \item Patch avec kustomize (nécessite l'installation de kustomize):
+      \begin{tiny}
+      \begin{Verbatim}[commandchars=\\\{\}]
+      # kustomize
+      kustomize edit set image mycompany/guestbook:v2.0
+      \end{Verbatim}
+      \end{tiny}
+         \item Patch avec kubectl:
+      \begin{tiny}
+      \begin{Verbatim}[commandchars=\&\{\}]
+      # plain yaml
+      kubectl patch --local \
+      -f config-deployment.yaml \
+      -p '{"spec":{"template":{"spec":{"containers":[{"name":"guestbook","image":"mycompany/guestbook:v2.0"}]}}}}' \
+      -o yaml
+      \end{Verbatim}
+      \end{tiny}
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Phase de sync \& ArgoCD}
+
+\begin{itemize}
+   \item Comme indiqué dans la documentation ArgoCD, il est préférable de télécharger systématiquement la derniere version du client \textbf{argo}
+   \item Lancer ensuite les commandes suivantes dans le pipeline de la CI:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+export ARGOCD_SERVER=argocd.mycompany.com
+export ARGOCD_AUTH_TOKEN=<JWT token generated from project>
+curl -sSL -o /usr/local/bin/argocd https://${ARGOCD_SERVER}/download/argocd-linux-amd64
+argocd app sync \textbf{nom application}
+argocd app wait \textbf{nom application}
+\end{Verbatim}
+\end{tiny}
+\end{itemize}
 
 \end{frame}
 
