@@ -1675,6 +1675,8 @@ argocd app create postgres-operator \
 \end{Verbatim}
 \end{tiny}
    \item Cette commande est décrite en détail dans la documentation  officielle: \url{https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_app_create/}
+   \item Pour information, le dépôt ci-dessus est un fork du dépôt officiel
+   \item L'ensemble des modifications réalisées pour le POC sont tracées dans la branche \textit{poc-argocd}
 \end{itemize}
 
 \end{frame}
@@ -1692,7 +1694,7 @@ NAME                      CLUSTER                         NAMESPACE  PROJECT  ST
 argocd/postgres-operator  https://kubernetes.default.svc  default    default  Unknown  Healthy  <none>      ComparisonError  https://github.com/simonelbaz/postgres-operator.git  manifests  poc-argocd
 \end{Verbatim}
 \end{tiny}
-   \item Cette commande est décrite en détail dans la documentation  officielle: \url{https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_app_create/}
+   \item Selon le lien suivant \url{https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/}, le script kustomization.yaml est automatiquement détecté par ArgoCD
 \end{itemize}
 
 \end{frame}
@@ -1746,7 +1748,7 @@ resources:
    \item La 1\iere{} étape de la phase de patch est de récupérer le dépôt du projet:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\@\@]
-git clone https://github.com/zalando/postgres-operator
+git clone https://github.com/simonelbaz/postgres-operator.git
 cd postgres-operator
 \end{Verbatim}
 \end{tiny}
@@ -1852,6 +1854,188 @@ argocd app wait \textbf{nom application}
 \end{Verbatim}
 \end{tiny}
 \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{ArgoCD - Etat du cluster avant le lancement du sync}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ git log | head -1
+commit \textbf{90ad8c7}aed92c6430bcb36ab23228a2d57c2715d
+$ argocd app get argocd/postgres-operator
+Name:               argocd/postgres-operator
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          default
+URL:                https://10.109.47.144/applications/postgres-operator
+Repo:               https://github.com/simonelbaz/postgres-operator.git
+Target:             poc-argocd
+Path:               manifests
+SyncWindow:         Sync Allowed
+Sync Policy:        <none>
+Sync Status:        \textbf{OutOfSync} from \textbf{poc-argocd (90ad8c7)}
+Health Status:      Healthy
+
+GROUP                      KIND                NAMESPACE  NAME               STATUS     HEALTH   HOOK  MESSAGE
+                           ConfigMap           default    postgres-operator  OutOfSync                 
+                           Service             default    postgres-operator  OutOfSync  Healthy        
+                           ServiceAccount      default    postgres-operator  OutOfSync                 
+acid.zalan.do              postgresql          default    acid-test-cluster  OutOfSync                 
+apps                       Deployment          default    postgres-operator  OutOfSync  Healthy        
+rbac.authorization.k8s.io  ClusterRole                    postgres-operator  OutOfSync                 
+rbac.authorization.k8s.io  ClusterRole                    postgres-pod       OutOfSync                 
+rbac.authorization.k8s.io  ClusterRoleBinding             postgres-operator  OutOfSync
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{ArgoCD - Etat du cluster avant le lancement du sync}
+
+\begin{itemize}
+   \item L'information renvoyée par la commande \textbf{argocd get} est cohérente.
+   \item Il y a bien un décalage entre l'état du cluster et le dernier commit de la branche poc-argocd
+   \item Vérification de la version de l'image spilo déployée:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl describe pod acid-test-cluster-1 | grep spilo
+Labels:           application=spilo
+    Image:          \textbf{ghcr.io/zalando/spilo-15:2.1-p9}
+      KUBERNETES_ROLE_LABEL:      spilo-role
+      KUBERNETES_LABELS:          {"application":"spilo"}
+\end{Verbatim}
+\end{tiny}
+
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=1]{ArgoCD - Lancement de la synchronisation}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ argocd app sync postgres-operator
+TIMESTAMP                  GROUP                            KIND           NAMESPACE                  NAME    STATUS    HEALTH        HOOK  MESSAGE                                           
+2023-06-23T16:49:22+02:00  rbac.authorization.k8s.io  ClusterRoleBinding                 postgres-operator  OutOfSync                                                                         
+2023-06-23T16:49:22+02:00                              ConfigMap             default     postgres-operator  OutOfSync                                                                         
+2023-06-23T16:49:22+02:00                                Service             default     postgres-operator  OutOfSync  Healthy                                                                
+2023-06-23T16:49:22+02:00                             ServiceAccount         default     postgres-operator  OutOfSync                                                                         
+2023-06-23T16:49:22+02:00  acid.zalan.do              postgresql             default     acid-test-cluster  OutOfSync                                                                         
+2023-06-23T16:49:22+02:00   apps                      Deployment             default     postgres-operator  OutOfSync  Healthy                                                                
+2023-06-23T16:49:22+02:00  rbac.authorization.k8s.io  ClusterRole                        postgres-operator  OutOfSync                                                                         
+2023-06-23T16:49:22+02:00  rbac.authorization.k8s.io  ClusterRole                             postgres-pod  OutOfSync                                                                         
+2023-06-23T16:49:52+02:00         ServiceAccount     default     postgres-operator    Synced                                                                                                  
+2023-06-23T16:49:52+02:00          ConfigMap     default     postgres-operator    Synced                                                                                                      
+2023-06-23T16:49:53+02:00  rbac.authorization.k8s.io  ClusterRole                 postgres-operator    Synced                                                                                 
+2023-06-23T16:49:53+02:00  rbac.authorization.k8s.io  ClusterRole                      postgres-pod    Synced                                                                                 
+2023-06-23T16:49:55+02:00  rbac.authorization.k8s.io  ClusterRoleBinding                 postgres-operator    Synced                                                                          
+2023-06-23T16:49:57+02:00            Service     default     postgres-operator    Synced  Healthy                                                                                             
+2023-06-23T16:50:00+02:00   apps  Deployment     default     postgres-operator    Synced  Progressing                                                                                         
+2023-06-23T16:50:01+02:00  acid.zalan.do              postgresql             default     acid-test-cluster  OutOfSync                           postgresql.acid.zalan.do/acid-test-cluster con
+figured. Warning: resource postgresqls/acid-test-cluster is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on
+ resources created declaratively by either  create --save-config or  apply. The missing annotation will be patched automatically.                                                             
+2023-06-23T16:50:01+02:00                              ConfigMap             default     postgres-operator    Synced                            configmap/postgres-operator configured. Warnin
+g: resource configmaps/postgres-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources creat
+ed declaratively by either  create --save-config or  apply. The missing annotation will be patched automatically.                                                                             
+2023-06-23T16:50:01+02:00  rbac.authorization.k8s.io  ClusterRole            default          postgres-pod   Running    Synced                  clusterrole.rbac.authorization.k8s.io/postgres
+-pod reconciled. reconciliation required update. clusterrole.rbac.authorization.k8s.io/postgres-pod configured. Warning: resource clusterroles/postgres-pod is missing the kubectl.kubernetes.
+io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --save-config or  apply. The missing ann
+otation will be patched automatically.                                                                                                                                                        
+2023-06-23T16:50:01+02:00  rbac.authorization.k8s.io  ClusterRole            default     postgres-operator   Running    Synced                  clusterrole.rbac.authorization.k8s.io/postgres
+-operator reconciled. reconciliation required update. clusterrole.rbac.authorization.k8s.io/postgres-operator configured. Warning: resource clusterroles/postgres-operator is missing the kube
+ctl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --save-config or  apply. 
+The missing annotation will be patched automatically.                                                                                                                                         
+2023-06-23T16:50:01+02:00  rbac.authorization.k8s.io  ClusterRoleBinding     default     postgres-operator   Running    Synced                  clusterrolebinding.rbac.authorization.k8s.io/p
+ostgres-operator reconciled. reconciliation required update. clusterrolebinding.rbac.authorization.k8s.io/postgres-operator configured. Warning: resource clusterrolebindings/postgres-operato
+r is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --sa
+ve-config or  apply. The missing annotation will be patched automatically.                                                                                                                    
+2023-06-23T16:50:01+02:00                             ServiceAccount         default     postgres-operator    Synced                            serviceaccount/postgres-operator configured. W
+arning: resource serviceaccounts/postgres-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resou
+rces created declaratively by either  create --save-config or  apply. The missing annotation will be patched automatically.                                                                   
+2023-06-23T16:50:01+02:00                                Service             default     postgres-operator    Synced   Healthy                  service/postgres-operator configured. Warning:
+ resource services/postgres-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created d
+eclaratively by either  create --save-config or  apply. The missing annotation will be patched automatically.                                                                                 
+2023-06-23T16:50:01+02:00   apps                      Deployment             default     postgres-operator    Synced   Progressing              deployment.apps/postgres-operator configured. 
+Warning: resource deployments/postgres-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resource
+s created declaratively by either  create --save-config or  apply. The missing annotation will be patched automatically.                                                                      
+2023-06-23T16:50:02+02:00   apps          Deployment     default     postgres-operator    Synced  Healthy              deployment.apps/postgres-operator configured. Warning: resource deploym
+ents/postgres-operator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively b
+y either  create --save-config or  apply. The missing annotation will be patched automatically.                                                                                               
+2023-06-23T16:50:02+02:00  acid.zalan.do  postgresql     default     acid-test-cluster    Synced                       postgresql.acid.zalan.do/acid-test-cluster configured. Warning: resourc
+e postgresqls/acid-test-cluster is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declar
+atively by either  create --save-config or  apply. The missing annotation will be patched automatically.
+\ldots
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=1]{ArgoCD - Lancement de la synchronisation}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+Name:               argocd/postgres-operator
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          default
+URL:                https://10.109.47.144/applications/postgres-operator
+Repo:               https://github.com/simonelbaz/postgres-operator.git
+Target:             poc-argocd
+Path:               manifests
+SyncWindow:         Sync Allowed
+Sync Policy:        <none>
+Sync Status:        Synced to poc-argocd (90ad8c7)
+Health Status:      Healthy
+
+Operation:          Sync
+Sync Revision:      90ad8c7aed92c6430bcb36ab23228a2d57c2715d
+Phase:              Succeeded
+Start:              2023-06-23 16:49:21 +0200 CEST
+Finished:           2023-06-23 16:50:00 +0200 CEST
+Duration:           39s
+Message:            successfully synced (all tasks run)
+
+GROUP                      KIND                NAMESPACE  NAME               STATUS   HEALTH   HOOK  MESSAGE
+                           ServiceAccount      default    postgres-operator  Synced                  serviceaccount/postgres-operator configured. Warning: resource serviceaccounts/postgres-o
+perator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  creat
+e --save-config or  apply. The missing annotation will be patched automatically.
+                           ConfigMap           default    postgres-operator  Synced                  configmap/postgres-operator configured. Warning: resource configmaps/postgres-operator is
+ missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --save-c
+onfig or  apply. The missing annotation will be patched automatically.
+rbac.authorization.k8s.io  ClusterRole         default    postgres-pod       Running  Synced         clusterrole.rbac.authorization.k8s.io/postgres-pod reconciled. reconciliation required up
+date. clusterrole.rbac.authorization.k8s.io/postgres-pod configured. Warning: resource clusterroles/postgres-pod is missing the kubectl.kubernetes.io/last-applied-configuration annotation wh
+ich is required by  apply.  apply should only be used on resources created declaratively by either  create --save-config or  apply. The missing annotation will be patched automatically.
+rbac.authorization.k8s.io  ClusterRole         default    postgres-operator  Running  Synced         clusterrole.rbac.authorization.k8s.io/postgres-operator reconciled. reconciliation requir
+ed update. clusterrole.rbac.authorization.k8s.io/postgres-operator configured. Warning: resource clusterroles/postgres-operator is missing the kubectl.kubernetes.io/last-applied-configuratio
+n annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --save-config or  apply. The missing annotation will be patched auto
+matically.
+rbac.authorization.k8s.io  ClusterRoleBinding  default    postgres-operator  Running  Synced         clusterrolebinding.rbac.authorization.k8s.io/postgres-operator reconciled. reconciliation
+ required update. clusterrolebinding.rbac.authorization.k8s.io/postgres-operator configured. Warning: resource clusterrolebindings/postgres-operator is missing the kubectl.kubernetes.io/last
+-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --save-config or  apply. The missing annotation
+ will be patched automatically.
+                           Service             default    postgres-operator  Synced   Healthy        service/postgres-operator configured. Warning: resource services/postgres-operator is mis
+sing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create --save-confi
+g or  apply. The missing annotation will be patched automatically.
+apps                       Deployment          default    postgres-operator  Synced   Healthy        deployment.apps/postgres-operator configured. Warning: resource deployments/postgres-oper
+ator is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either  create -
+-save-config or  apply. The missing annotation will be patched automatically.
+acid.zalan.do              postgresql          default    acid-test-cluster  Synced                  postgresql.acid.zalan.do/acid-test-cluster configured. Warning: resource postgresqls/acid
+-test-cluster is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by  apply.  apply should only be used on resources created declaratively by either 
+ create --save-config or  apply. The missing annotation will be patched automatically.
+rbac.authorization.k8s.io  ClusterRole                    postgres-operator  Synced
+rbac.authorization.k8s.io  ClusterRole                    postgres-pod       Synced                   
+rbac.authorization.k8s.io  ClusterRoleBinding             postgres-operator  Synced
+\end{Verbatim}
+\end{tiny}
 
 \end{frame}
 
