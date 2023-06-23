@@ -1660,11 +1660,39 @@ Context '10.109.47.144' updated
 
 \begin{frame}[fragile]{Ajout de l'application postgres-operator dans ArgoCD}
 
-   WIP
+\begin{itemize}
+   \item ArgoCD se met à l'écoute des changements d'un projet de déploiement dans un dépôt.
+   \item L'étape suivante "abonne" ArgoCD au dépôt Github sur lequel est enregistré le déploiement de l'opérateur postgres
+   \item La commande qui lie ArgoCD au dépôt de l'opérateur est la suivante:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+argocd app create postgres-operator \
+--repo https://github.com/simonelbaz/postgres-operator.git \
+--path manifests \
+--dest-server https://kubernetes.default.svc \
+--revision poc-argocd \
+--dest-namespace default
+\end{Verbatim}
+\end{tiny}
+   \item Cette commande est décrite en détail dans la documentation  officielle: \url{https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_app_create/}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Ajout de l'application postgres-operator dans ArgoCD}
 
 \begin{itemize}
-   \item Ajout dans ArgoCD du dépôt de l'application
-   \item ???
+   \item Pour vérifier que l'application a correctement été ajoutée dans ArgoCD:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ argocd app list
+NAME                      CLUSTER                         NAMESPACE  PROJECT  STATUS   HEALTH   SYNCPOLICY  CONDITIONS       REPO                                                 PATH       TARGET
+argocd/postgres-operator  https://kubernetes.default.svc  default    default  Unknown  Healthy  <none>      ComparisonError  https://github.com/simonelbaz/postgres-operator.git  manifests  poc-argocd
+\end{Verbatim}
+\end{tiny}
+   \item Cette commande est décrite en détail dans la documentation  officielle: \url{https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_app_create/}
 \end{itemize}
 
 \end{frame}
@@ -1725,14 +1753,25 @@ cd postgres-operator
    \item Il devient possible de patcher avec la commande \textbf{kustomize} ou la commande \textbf{kubectl}
    \begin{itemize}
          \item Patch avec kustomize (nécessite l'installation de kustomize):
+   \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Phase de patch avec \textbf{kustomize}}
+
+\begin{itemize}
+   \item L'URL suivante décrit l'installation de kustomize: \url{https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/}
+   \item Pour installer kustomize, merci de lancer la commande suivante:
       \begin{tiny}
-      \begin{Verbatim}[commandchars=\\\{\}]
-      # kustomize
-      kustomize edit set image mycompany/guestbook:v2.0
+      \begin{Verbatim}[commandchars=\&\{\}]
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
       \end{Verbatim}
       \end{tiny}
-      \item Cette méthode n'a pas été explorée
-   \end{itemize}
+   \item kustomize peut servir à l'édition de kustomization.yaml.
+   \item Dans le cadre du POC, cela n'a pas été nécessaire
 \end{itemize}
 
 \end{frame}
@@ -1782,7 +1821,7 @@ metadata:
 \begin{itemize}
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
-   kubectl patch --local -f configmap.yaml -p '{"data":{"docker_image":"ghcr.io/zalando/spilo-15:2.1-p10"}}' -o yaml > configmap.yaml.new
+   kubectl patch --local -f configmap.yaml -p '{"data":{"docker_image":"ghcr.io/zalando/spilo-15:3.0-p1"}}' -o yaml > configmap.yaml.new
    mv configmap.yaml.new configmap.yaml
 \end{Verbatim}
 \end{tiny}
