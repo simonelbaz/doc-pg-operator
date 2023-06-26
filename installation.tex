@@ -2133,15 +2133,124 @@ Events:                 <none>
 \begin{frame}[fragile]{StatefulSets}
 
    La définition officielle des StatefulSets est disponible à l'URL suivante: \url{https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/}
-   L'opérateur PostgreSQL met en place les statefulsets suivants:
+   Les Pods portants l'image Spilo sont déployés en se basant sur des statefulsets:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
-$ kubectl get ss
-NAME                              DESIRED   CURRENT   READY   AGE
-postgres-operator-fcbd7cc96       1         1         1       101d
-postgres-operator-ui-5579cc7779   1         1         1       101d
+$ kubectl get statefulsets
+NAME                READY   AGE
+acid-test-cluster   2/2     88d
 \end{Verbatim}
 \end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=8]{Détails des statefulSets}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl describe statefulset acid-test-cluster
+Name:               acid-test-cluster 
+Namespace:          default         
+CreationTimestamp:  Wed, 29 Mar 2023 19:51:13 +0200      
+Selector:           application=spilo,cluster-name=acid-test-cluster                                                                                                                          Labels:             application=spilo                                                                                                                                                                             cluster-name=acid-test-cluster                                                                                                                                            
+                    team=acid         
+Annotations:        <none>
+Replicas:           2 desired | 2 total
+\textbf{Update Strategy:    OnDelete}
+Pods Status:        2 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:           application=spilo
+                    cluster-name=acid-test-cluster                           
+                    team=acid
+  Service Account:  postgres-pod
+  Init Containers:
+   date:                                                                                       
+    Image:      busybox
+    Port:       <none> 
+    Host Port:  <none>
+    Command:           
+      /bin/date                 
+    Environment:  <none>          
+    Mounts:       <none>                                                                       
+  Containers:             
+   postgres:           
+    \textbf{Image:       ghcr.io/zalando/spilo-15:2.1-p9}
+    Ports:       8008/TCP, 5432/TCP, 8080/TCP
+    Host Ports:  0/TCP, 0/TCP, 0/TCP
+    Limits:                                                                                                                                                                                   
+      cpu:     500m
+      memory:  500Mi
+    Requests:
+      cpu:     10m
+      memory:  100Mi
+    Environment:
+      SCOPE:                      acid-test-cluster
+      PGROOT:                     /home/postgres/pgdata/pgroot
+      POD_IP:                      (v1:status.podIP)
+      POD_NAMESPACE:               (v1:metadata.namespace)
+      PGUSER_SUPERUSER:           postgres
+      KUBERNETES_SCOPE_LABEL:     cluster-name
+      KUBERNETES_ROLE_LABEL:      spilo-role
+      PGPASSWORD_SUPERUSER:       <set to the key 'password' in secret 'postgres.acid-test-cluster.credentials.postgresql.acid.zalan.do'>  Optional: false
+      PGUSER_STANDBY:             standby
+      PGPASSWORD_STANDBY:         <set to the key 'password' in secret 'standby.acid-test-cluster.credentials.postgresql.acid.zalan.do'>  Optional: false
+      PAM_OAUTH2:                 https://info.example.com/oauth2/tokeninfo?access_token= uid realm=/employees
+      HUMAN_ROLE:                 zalandos
+      ENABLE_WAL_PATH_COMPAT:     true
+      PGVERSION:                  15
+      KUBERNETES_LABELS:          {"application":"spilo"}
+      SPILO_CONFIGURATION:        {"postgresql":{"parameters":{"shared_buffers":"32MB"}},"bootstrap":{"initdb":[{"auth-host":"md5"},{"auth-local":"trust"},"data-checksums",{"encoding":"UTF8"
+},{"locale":"en_US.UTF-8"}],"users":{"zalandos":{"password":"","options":["CREATEDB","NOLOGIN"]}},"dcs":{"ttl":30,"loop_wait":10,"retry_timeout":10,"maximum_lag_on_failover":33554432,"synchr
+onous_node_count":1,"postgresql":{"parameters":{"log_statement":"all","max_connections":"10"}},"failsafe_mode":false}}}
+      DCS_ENABLE_KUBERNETES_API:  true
+    Mounts:
+      /dev/shm from dshm (rw)
+      /home/postgres/pgdata from pgdata (rw)
+      /opt/empty from empty (rw)
+  Volumes:
+   dshm:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     Memory
+    SizeLimit:  <unset>
+   empty:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+Volume Claims:
+  Name:          pgdata
+  StorageClass:  rook-ceph-block
+  Labels:        application=spilo
+                 cluster-name=acid-test-cluster 
+                 team=acid
+  Annotations:   <none>
+  Capacity:      1Gi
+  Access Modes:  [ReadWriteOnce]
+Events:          <none>
+
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Détails des statefulSets}
+
+   \begin{itemize}
+      \item Comme indiqué dans les détails du statefulset, la politique de mise à jour est \textbf{OnDelete}.
+      \item D'après la documentation officielle, cela signifie que la mise à jour des pods passe par une suppression des pods.
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Traitement des statefulsets par Argo}
+
+   WIP
+   \url{https://argo-cd.readthedocs.io/en/stable/faq/#why-is-my-application-stuck-in-progressing-state}
 
 \end{frame}
 
