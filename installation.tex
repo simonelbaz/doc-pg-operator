@@ -2041,6 +2041,112 @@ rbac.authorization.k8s.io  ClusterRoleBinding             postgres-operator  Syn
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Installation d'argo-rollouts}
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ kubectl create namespace argo-rollouts
+namespace/argo-rollouts created
+$ kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/analysistemplates.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/clusteranalysistemplates.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/experiments.argoproj.io created
+customresourcedefinition.apiextensions.k8s.io/rollouts.argoproj.io created
+serviceaccount/argo-rollouts created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-admin created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-edit created
+clusterrole.rbac.authorization.k8s.io/argo-rollouts-aggregate-to-view created
+clusterrolebinding.rbac.authorization.k8s.io/argo-rollouts created
+configmap/argo-rollouts-config created
+secret/argo-rollouts-notification-secret created
+service/argo-rollouts-metrics created
+deployment.apps/argo-rollouts created
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Réplicasets}
+
+   L'opérateur PostgreSQL met en place des réplicats set:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ kubectl get rs
+NAME                              DESIRED   CURRENT   READY   AGE
+postgres-operator-fcbd7cc96       1         1         1       101d
+postgres-operator-ui-5579cc7779   1         1         1       101d
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=7]{Détail des réplicasets}
+
+La commande suivante permet d'obtenir plus d'informations sur le réplicaset \textbf{postgres-operator}:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ kubectl describe rs/postgres-operator-fcbd7cc96
+Name:           postgres-operator-fcbd7cc96
+Namespace:      default
+Selector:       name=postgres-operator,pod-template-hash=fcbd7cc96
+Labels:         name=postgres-operator
+                pod-template-hash=fcbd7cc96
+Annotations:    deployment.kubernetes.io/desired-replicas: 1
+                deployment.kubernetes.io/max-replicas: 1
+                deployment.kubernetes.io/revision: 1
+Controlled By:  Deployment/postgres-operator
+Replicas:       1 current / 1 desired
+Pods Status:    1 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:           name=postgres-operator
+                    pod-template-hash=fcbd7cc96
+  Service Account:  postgres-operator
+  Containers:
+   postgres-operator:
+    Image:      registry.opensource.zalan.do/acid/postgres-operator:v1.9.0
+    Port:       <none>
+    Host Port:  <none>
+    Limits:
+      cpu:     500m
+      memory:  500Mi
+    Requests:
+      cpu:     100m
+      memory:  250Mi
+    Environment:
+      CONFIG_MAP_NAME:  postgres-operator
+    Mounts:             <none>
+  Volumes:              <none>
+Events:                 <none>
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{StatefulSets}
+
+   La définition officielle des StatefulSets est disponible à l'URL suivante: \url{https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/}
+   L'opérateur PostgreSQL met en place les statefulsets suivants:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\#\#]
+$ kubectl get ss
+NAME                              DESIRED   CURRENT   READY   AGE
+postgres-operator-fcbd7cc96       1         1         1       101d
+postgres-operator-ui-5579cc7779   1         1         1       101d
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Accès client à la base de données}
 
    WIP
@@ -2076,6 +2182,14 @@ rbac.authorization.k8s.io  ClusterRoleBinding             postgres-operator  Syn
 \begin{frame}[fragile]{Mise à jour majeure de PostgreSQL}
 
    WIP
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Supervision}
+
+   WIP (Prometheus)
 
 \end{frame}
 
