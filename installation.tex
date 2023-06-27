@@ -1006,14 +1006,7 @@ index 8d197a75..56b32c34 100644
  
  # Add node affinity support by allowing postgres pods to schedule only on nodes that
  # have label: "postgres-operator:enabled" set.
--#  nodeAffinity:
--#    requiredDuringSchedulingIgnoredDuringExecution:
--#      nodeSelectorTerms:
--#        - matchExpressions:
--#            - key: postgres-operator
--#              operator: In
--#              values:
--#                - enabled
+\ldots
 +  nodeAffinity:
 +    requiredDuringSchedulingIgnoredDuringExecution:
 +      nodeSelectorTerms:
@@ -1159,21 +1152,12 @@ kubectl create -f manifests/complete-postgresql-manifest.yaml
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\{\}]
 $ kubectl get pods -l application=spilo -L spilo-role
-NAME                  READY   STATUS    RESTARTS   AGE   SPILO-ROLE
-acid-test-cluster-0   1/1     Running   0          12m   
-acid-test-cluster-1   1/1     Running   0          10m   
+NAME                  READY   STATUS    RESTARTS   AGE     SPILO-ROLE
+acid-test-cluster-0   1/1     Running   0          6m49s   master
+acid-test-cluster-1   1/1     Running   0          6m12s   replica
 $ kubectl get postgresql
 NAME                TEAM   VERSION   PODS   VOLUME   CPU-REQUEST   MEMORY-REQUEST   AGE   STATUS
 acid-test-cluster   acid   15        2      1Gi      10m           100Mi            68d   Running
-$ kubectl get pods -l application=spilo -L spilo-role
-NAME                  READY   STATUS    RESTARTS   AGE   SPILO-ROLE
-acid-test-cluster-0   1/1     Running   0          13m   
-acid-test-cluster-1   1/1     Running   0          10m   
-$ kubectl get svc -l application=spilo -L spilo-role
-NAME                       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SPILO-ROLE
-acid-test-cluster          ClusterIP   10.103.247.68   <none>        5432/TCP   68d   master
-acid-test-cluster-config   ClusterIP   None            <none>        <none>     68d   
-acid-test-cluster-repl     ClusterIP   10.100.95.205   <none>        5432/TCP   68d   replica
 \end{Verbatim}
 \end{tiny}
 
@@ -2249,8 +2233,79 @@ Events:          <none>
 
 \begin{frame}[fragile]{Traitement des statefulsets par Argo}
 
-   WIP
+   A priori, le traitement des statefulsets peut avoir des limitations:
    \url{https://argo-cd.readthedocs.io/en/stable/faq/#why-is-my-application-stuck-in-progressing-state}
+   Cette limitation a été corrigée
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Mise à jour des images Spilo - \textbf{Upgrade mineur}}
+
+   \begin{itemize}
+      \item Le script de création du cluster mis à disposition par le dépôt de l'opérateur PostgreSQL est: \textbf{manifests/complete-postgres-manifest.yaml}
+      \item Il va être copié dans un répertoire dédié (\textbf{deployment}) pour gérer sa synchronisation avec ArgoCD
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+argocd app create postgres-deployment \textbackslash
+--repo https://github.com/simonelbaz/postgres-operator.git \textbackslash
+\textbf{--path deployment} \textbackslash
+--dest-server https://kubernetes.default.svc \textbackslash
+--revision poc-argocd \textbackslash
+--dest-namespace default
+\end{Verbatim}
+\end{tiny}
+      \item Le script est modifié avec la nouvelle version de l'image spilo:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ cat deployment/complete-postgres-manifest.yaml  | grep dockerImage
+\textbf{  dockerImage: ghcr.io/zalando/spilo-15:3.0-p1}
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=4]{Mise à jour des images Spilo - \textbf{Upgrade mineur}}
+
+   \begin{itemize}
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ argocd app sync postgres-deployment
+TIMESTAMP                  GROUP                KIND   NAMESPACE                  NAME    STATUS    HEALTH        HOOK  MESSAGE
+2023-06-26T18:44:36+02:00  acid.zalan.do  postgresql     default     acid-test-cluster  OutOfSync                       
+2023-06-26T18:45:07+02:00  acid.zalan.do  postgresql     default     acid-test-cluster  OutOfSync                       postgresql.acid.zalan.do/acid-test-cluster configured
+2023-06-26T18:45:09+02:00  acid.zalan.do  postgresql     default     acid-test-cluster    Synced                       postgresql.acid.zalan.do/acid-test-cluster configured
+
+Name:               argocd/postgres-deployment
+Project:            default
+Server:             https://kubernetes.default.svc
+Namespace:          default
+URL:                https://10.109.47.144/applications/postgres-deployment
+Repo:               https://github.com/simonelbaz/postgres-operator.git
+Target:             poc-argocd
+Path:               deployment
+SyncWindow:         Sync Allowed
+Sync Policy:        <none>
+Sync Status:        Synced to poc-argocd (cfb2094)
+Health Status:      Healthy
+
+Operation:          Sync
+Sync Revision:      cfb20940760cf96ced4a5872f161c280457c9784
+Phase:              Succeeded
+Start:              2023-06-26 18:44:34 +0200 CEST
+Finished:           2023-06-26 18:45:06 +0200 CEST
+Duration:           32s
+Message:            successfully synced (all tasks run)
+
+GROUP          KIND        NAMESPACE  NAME               STATUS  HEALTH  HOOK  MESSAGE
+acid.zalan.do  postgresql  default    acid-test-cluster  Synced                postgresql.acid.zalan.do/acid-test-cluster configured
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
 
 \end{frame}
 
@@ -2296,9 +2351,9 @@ Events:          <none>
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Supervision}
+\begin{frame}[fragile]{Supervision - Prometheus}
 
-   WIP (Prometheus)
+   WIP
 
 \end{frame}
 
