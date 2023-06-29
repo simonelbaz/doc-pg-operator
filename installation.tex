@@ -1324,7 +1324,6 @@ $ ssh -L 9090:localhost:9090 dgfip-k8s
 \begin{frame}[fragile]{Marquage des n\oe{}uds Minio}
 
    Depuis le control plane, lancer les commandes suivantes pour marquer les n\oe{}uds:
-\begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 $ kubectl label nodes dnumminioworker1 role=s3-node
 node/dnumminioworker1 labeled
@@ -1335,10 +1334,15 @@ node/dnumminioworker3 labeled
 $ kubectl label nodes dnumminioworker4 role=s3-node
 node/dnumminioworker4 labeled
 \end{Verbatim}
-\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Marquage des n\oe{}uds Minio}
 
    Affichage du label des n\oe{}uds:
-\begin{tiny}
+   \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 $ kubectl get nodes --show-labels
 NAME               STATUS   ROLES           AGE    VERSION   LABELS
@@ -1350,7 +1354,7 @@ dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role
 \ldots
 
 \end{Verbatim}
-\end{tiny}
+   \end{tiny}
 
 \end{frame}
 
@@ -1450,17 +1454,15 @@ dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[shrink=7,fragile]{Utilisation de container en mode rootless dans OpenShift}
+\begin{frame}[fragile]{Utilisation de container en mode rootless dans OpenShift}
 
-   L'URL suivante décrit la problèmatique d'utilisation de container dans un environnement rootless: \\
-   \begin{tiny}
+   \begin{itemize}
+\item L'URL suivante décrit la problèmatique d'utilisation de container dans un environnement rootless: \\
    \url{https://docs.bitnami.com/tutorials/running-non-root-containers-on-openshift} \\
-   \end{tiny}
-   Cette page fournit également un lien intéressant sur la sécurisation d'un cluster Kubernetes en se basant sur les \textbf{Pod Security Policies}.\\
-   Le lien est le suivant: \\
-   \begin{tiny}
+\item Cette page fournit également un lien intéressant sur la sécurisation d'un cluster Kubernetes en se basant sur les \textbf{Pod Security Policies}.\\
+\item Le lien est le suivant:
    \url{https://docs.bitnami.com/tutorials/secure-kubernetes-cluster-psp/}.
-   \end{tiny}
+   \end{itemize}
 
 \end{frame}
 
@@ -2351,10 +2353,296 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Supervision - Prometheus}
+\begin{frame}[fragile]{Supervision du cluster k8s - Prometheus}
 
-   WIP
+\begin{itemize}
+   \item Le cluster k8s nécessite une supervision.
+   \item Prometheus est une solution de supervision open source répandue
+   \item Elle possède un opérateur \textbf{kube-prometheus} dont le déploiement est décrit depuis le site Github
+\end{itemize}
 
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de \textbf{kube-prometheus}}
+
+\begin{itemize}
+   \item Le lien suivant décrit les commandes de déploiement: \url{https://github.com/prometheus-operator/kube-prometheus#quickstart}
+   \item Les commandes suivantes décrivent le déploiement de l'opérateur \textbf{kube-prometheus}
+   \begin{tiny}
+   \begin{Verbatim}[commandchars=\\\{\}]
+      $ git clone https://github.com/prometheus-operator/kube-prometheus.git
+      $ kubectl apply --server-side -f manifests/setup
+   customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com serverside-applied
+   \ldots
+      $ kubectl wait \
+        --for condition=Established \
+        --all CustomResourceDefinition \
+        --namespace=monitoring
+customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com condition met
+customresourcedefinition.apiextensions.k8s.io/alertmanagers.monitoring.coreos.com condition met
+customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io condition met
+   \ldots
+    $ kubectl apply -f manifests/
+   \ldots
+   \end{Verbatim}
+   \end{tiny}
+\item la dernière commande s'est terminée en erreur et a nécessité un double lancement
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{DaemonSets - Prometheus}
+
+   \begin{itemize}
+      \item Le déploiement des nodes exporter de Prometheus est instancié sous forme de DaemonSets
+      \item Liste des daemonsets
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl get daemonsets -n monitoring
+NAME            DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+node-exporter   10        10        10      10           10          kubernetes.io/os=linux   110m
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès à l'UI de Prometheus}
+
+\begin{itemize}
+\item le lien suivant décrit le mode opératoire pour accéder à l'UI de Prometheus: \url{https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/access-ui.md}
+\item Depuis le n\oe{}ud control plane, ouvrir un port forward:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ kubectl --namespace monitoring port-forward svc/prometheus-k8s 9090
+Forwarding from 127.0.0.1:9090 -> 9090
+Forwarding from [::1]:9090 -> 9090
+\end{Verbatim}
+\end{tiny}
+\item Pour accéder à l'interface web de l'opérateur PostgreSQL depuis le PC de l'utilisateur, il est possible de passer par une redirection SSH:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\&\{\}]
+ssh -L 9095:10.106.57.137:9090 dgfip-k8s
+\end{Verbatim}
+\end{tiny}
+\item Lancer le navigateur pour accéder à l'URL \url{http://localhost:9095/}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Ecran d'accueil de l'UI de Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_ecran_accueil.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Ecran des alertes de l'UI de Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_ecran_alerts.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Flags de la ligne de commandes - Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_command_line_flags.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Rules - Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_rules.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Runtime - Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_runtime.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Service Discovery - Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_service_discovery.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Targets - Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_targets.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{TSDB Status - Prometheus}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{prometheus_tsdb_status.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement du \textbf{node exporter} de PostgreSQL}
+
+\begin{itemize}
+   \item Le précédent déploiement permet de monitorer le cluster k8s
+   \item Il est maintenant temps de monitorer la base de données PostgreSQL
+   \item La communauté Prometheus met à disposition l'exporter PostgreSQL à l'URL suivante:
+   \url{https://github.com/prometheus-community/postgres_exporter}
+   \item Il est possible de déployer l'exporter postgres sur un pod de type \textbf{sidecar}
+   \item Par simplicité du POC, l'image Docker mise à disposition par la communauté a été employée
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement du \textbf{node exporter} de PostgreSQL}
+
+
+\begin{itemize}
+   \item Les commandes de déploiement de l'exporter PostgreSQL sont décrites dans l'URL suivante: \url{https://github.com/prometheus-community/postgres_exporter#quick-start}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Lancement de l'exporter PostgreSQL}
+
+   Dans un $1\ier{}$ temps, on met en place le classique port forward depuis le control plane:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+$ export PGMASTER=$(kubectl get pods -o jsonpath={.items..metadata.name} -l application=spilo,cluster-name=acid-test-cluster,spilo-role=master -n default)
+$ kubectl port-forward $PGMASTER 6432:5432 -n default
+Forwarding from 127.0.0.1:6432 -> 5432
+Forwarding from [::1]:6432 -> 5432
+\end{Verbatim}
+\end{tiny}
+
+   Dans un $2\ieme{}$ temps, le Docker est lancé depuis la VM dédiée:
+
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+sudo docker run --net=host  -p 9187:9187  -e DATA_SOURCE_NAME="postgresql://postgres:*******@localhost:6432/postgres?sslmode=require"  -v /home/linagora/postgres_exporter.yml:/home/linagora/postgres_exporter.yml quay.io/prometheuscommunity/postgres-exporter --config.file="/home/linagora/postgres_exporter.yml" --log.level="debug"
+\end{Verbatim}
+\end{tiny}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès à l'UI de l'exporter Postgres}
+
+\begin{itemize}
+\item Ouvrir un tunnel SSH vers le Docker exporter Postgres:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+ssh -L 9187:localhost:9187 dgfip-prometheus
+\end{Verbatim}
+\end{tiny}
+\item Lancer le navigateur pour accéder à l'URL \url{http://localhost:9187/}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{UI de l'exporter Postgres}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=0, width=0.5\textwidth]{exporter_pg.eps}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile,shrink=5]{Extrait de métriques remontées par l'exporter PostgreSQL}
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# HELP pg_statio_user_tables_heap_blocks_read Number of disk blocks read from this table
+# TYPE pg_statio_user_tables_heap_blocks_read counter
+pg_statio_user_tables_heap_blocks_read{datname="postgres",relname="job",schemaname="cron"} 0
+pg_statio_user_tables_heap_blocks_read{datname="postgres",relname="job_run_details",schemaname="cron"} 0
+pg_statio_user_tables_heap_blocks_read{datname="postgres",relname="postgres_log",schemaname="public"} 0
+# HELP pg_statio_user_tables_idx_blocks_hit Number of buffer hits in all indexes on this table
+# TYPE pg_statio_user_tables_idx_blocks_hit counter
+pg_statio_user_tables_idx_blocks_hit{datname="postgres",relname="job",schemaname="cron"} 0
+pg_statio_user_tables_idx_blocks_hit{datname="postgres",relname="job_run_details",schemaname="cron"} 0
+pg_statio_user_tables_idx_blocks_hit{datname="postgres",relname="postgres_log",schemaname="public"} 0
+# HELP pg_statio_user_tables_idx_blocks_read Number of disk blocks read from all indexes on this table
+# TYPE pg_statio_user_tables_idx_blocks_read counter
+pg_statio_user_tables_idx_blocks_read{datname="postgres",relname="job",schemaname="cron"} 0
+pg_statio_user_tables_idx_blocks_read{datname="postgres",relname="job_run_details",schemaname="cron"} 0
+pg_statio_user_tables_idx_blocks_read{datname="postgres",relname="postgres_log",schemaname="public"} 0
+# HELP pg_statio_user_tables_tidx_blocks_hit Number of buffer hits in this table's TOAST table indexes (if any)
+# TYPE pg_statio_user_tables_tidx_blocks_hit counter
+pg_statio_user_tables_tidx_blocks_hit{datname="postgres",relname="job",schemaname="cron"} 0
+pg_statio_user_tables_tidx_blocks_hit{datname="postgres",relname="job_run_details",schemaname="cron"} 0
+pg_statio_user_tables_tidx_blocks_hit{datname="postgres",relname="postgres_log",schemaname="public"} 0
+# HELP pg_statio_user_tables_tidx_blocks_read Number of disk blocks read from this table's TOAST table indexes (if any)
+# TYPE pg_statio_user_tables_tidx_blocks_read counter
+pg_statio_user_tables_tidx_blocks_read{datname="postgres",relname="job",schemaname="cron"} 0
+pg_statio_user_tables_tidx_blocks_read{datname="postgres",relname="job_run_details",schemaname="cron"} 0
+pg_statio_user_tables_tidx_blocks_read{datname="postgres",relname="postgres_log",schemaname="public"} 0
+\end{Verbatim}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
