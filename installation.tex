@@ -6,7 +6,7 @@
 
 \begin{figure}
 \begin{center}
-\includegraphics[scale=0.5]{images/architecture.eps}
+\includegraphics[width=0.9\textwidth, height=0.9\textheight]{images/architecture.eps}
 \end{center}
 \end{figure}
 
@@ -121,7 +121,8 @@ sudo apt-get install \
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
 sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://download.docker.com/linux/debian/gpg \
+| sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 \end{Verbatim}
 \end{tiny}
@@ -165,7 +166,8 @@ sudo chmod a+r /etc/apt/keyrings/docker.gpg
 sudo apt-get install -y ca-certificates curl
 sudo apt-get install -y apt-transport-https
 sudo apt-get update
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+| sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] \
 https://apt.kubernetes.io/ kubernetes-xenial main" | \
 sudo tee /etc/apt/sources.list.d/kubernetes.list
@@ -1432,11 +1434,11 @@ dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Clé d'accès et secret - Minio}
-
-   WIP
-
-\end{frame}
+%\begin{frame}[fragile]{Clé d'accès et secret - Minio}
+%
+%   WIP
+%
+%\end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1608,7 +1610,8 @@ La commande suivante permet de récupérer le mot de passe initial de l'admin d'
 linagora@debian-cp:~$ argocd admin initial-password -n argocd
 *******************
 
- This password must be only used for first time login. We strongly recommend you update the password using `argocd account update-password`.
+ This password must be only used for first time login. We strongly recommend you 
+ update the password using `argocd account update-password`.
 \end{Verbatim}
 \end{tiny}
 
@@ -1616,7 +1619,7 @@ linagora@debian-cp:~$ argocd admin initial-password -n argocd
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Login avec la CLI d'ArgoCD}
+\begin{frame}[shrink=4,fragile]{Login avec la CLI d'ArgoCD}
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -1631,7 +1634,8 @@ argocd-repo-server                        ClusterIP      10.111.28.234    <none>
 \textbf{argocd-server                             LoadBalancer   10.109.47.144    <pending>     80:30235/TCP,443:30885/TCP   6d16h}
 argocd-server-metrics                     ClusterIP      10.98.167.31     <none>        8083/TCP                     6d16h
 linagora@debian-cp:~$ argocd login 10.109.47.144
-WARNING: server certificate had error: x509: cannot validate certificate for 10.109.47.144 because it doesn't contain any IP SANs. Proceed insecurely (y/n)? y
+WARNING: server certificate had error: x509: cannot validate certificate for 10.109.47.144 because it doesn't contain 
+any IP SANs. Proceed insecurely (y/n)? y
 Username: admin
 Password: 
 'admin:login' logged in successfully
@@ -1669,15 +1673,15 @@ argocd app create postgres-operator \
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}[fragile]{Ajout de l'application postgres-operator dans ArgoCD}
+\begin{frame}[fragile,shrink=5]{Ajout de l'application postgres-operator dans ArgoCD}
 
 \begin{itemize}
    \item Pour vérifier que l'application a correctement été ajoutée dans ArgoCD:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
 $ argocd app list
-NAME                      CLUSTER                         NAMESPACE  PROJECT  STATUS   HEALTH   SYNCPOLICY  CONDITIONS       REPO                                                 PATH       TARGET
-argocd/postgres-operator  https://kubernetes.default.svc  default    default  Unknown  Healthy  <none>      ComparisonError  https://github.com/simonelbaz/postgres-operator.git  manifests  poc-argocd
+NAME                      CLUSTER                         NAMESPACE  PROJECT  STATUS   HEALTH   SYNCPOLICY  
+argocd/postgres-operator  https://kubernetes.default.svc  default    default  Unknown  Healthy  <none>      
 \end{Verbatim}
 \end{tiny}
    \item Selon le lien suivant \url{https://argo-cd.readthedocs.io/en/stable/user-guide/tool_detection/}, le script kustomization.yaml est automatiquement détecté par ArgoCD
@@ -1809,7 +1813,9 @@ metadata:
 \begin{itemize}
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
-   kubectl patch --local -f configmap.yaml -p '{"data":{"docker_image":"ghcr.io/zalando/spilo-15:3.0-p1"}}' -o yaml > configmap.yaml.new
+   kubectl patch --local -f configmap.yaml \textbackslash
+   -p '{"data":{"docker_image":"ghcr.io/zalando/spilo-15:3.0-p1"}}' \textbackslash
+   -o yaml > configmap.yaml.new
    mv configmap.yaml.new configmap.yaml
 \end{Verbatim}
 \end{tiny}
@@ -2056,6 +2062,17 @@ deployment.apps/argo-rollouts created
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{frame}[fragile]{Utilisation d'Argo Rollouts}
+
+\begin{itemize}
+   \item Dans le cadre du POC, il n'a pas été nécessaire d'utiliser Argo Rollouts.
+   \item Argo CD a été suffisant pour "pusher" la nouvelle image Docker \textbf{spilo}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Réplicasets}
 
    L'opérateur PostgreSQL met en place des réplicats set:
@@ -2135,13 +2152,15 @@ acid-test-cluster   2/2     88d
 \begin{frame}[fragile,shrink=8]{Détails des statefulSets}
 
 \begin{tiny}
-\begin{Verbatim}[commandchars=\\\{\}]
+\begin{Verbatim}[commandchars=\&\#\#]
 $ kubectl describe statefulset acid-test-cluster
 Name:               acid-test-cluster 
 Namespace:          default         
 CreationTimestamp:  Wed, 29 Mar 2023 19:51:13 +0200      
-Selector:           application=spilo,cluster-name=acid-test-cluster                                                                                                                          Labels:             application=spilo                                                                                                                                                                             cluster-name=acid-test-cluster                                                                                                                                            
-                    team=acid         
+Selector:           application=spilo,cluster-name=acid-test-cluster
+Labels:             application=spilo
+                    cluster-name=acid-test-cluster
+                    team=acid
 Annotations:        <none>
 Replicas:           2 desired | 2 total
 \textbf{Update Strategy:    OnDelete}
@@ -2187,9 +2206,8 @@ Pod Template:
       ENABLE_WAL_PATH_COMPAT:     true
       PGVERSION:                  15
       KUBERNETES_LABELS:          {"application":"spilo"}
-      SPILO_CONFIGURATION:        {"postgresql":{"parameters":{"shared_buffers":"32MB"}},"bootstrap":{"initdb":[{"auth-host":"md5"},{"auth-local":"trust"},"data-checksums",{"encoding":"UTF8"
-},{"locale":"en_US.UTF-8"}],"users":{"zalandos":{"password":"","options":["CREATEDB","NOLOGIN"]}},"dcs":{"ttl":30,"loop_wait":10,"retry_timeout":10,"maximum_lag_on_failover":33554432,"synchr
-onous_node_count":1,"postgresql":{"parameters":{"log_statement":"all","max_connections":"10"}},"failsafe_mode":false}}}
+      SPILO_CONFIGURATION:        {"postgresql":{"parameters":{"shared_buffers":"32MB"}},
+      \ldots
       DCS_ENABLE_KUBERNETES_API:  true
     Mounts:
       /dev/shm from dshm (rw)
@@ -2277,10 +2295,12 @@ $ cat deployment/complete-postgres-manifest.yaml  | grep dockerImage
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
 $ argocd app sync postgres-deployment
-TIMESTAMP                  GROUP                KIND   NAMESPACE                  NAME    STATUS    HEALTH        HOOK  MESSAGE
-2023-06-26T18:44:36+02:00  acid.zalan.do  postgresql     default     acid-test-cluster  OutOfSync                       
-2023-06-26T18:45:07+02:00  acid.zalan.do  postgresql     default     acid-test-cluster  OutOfSync                       postgresql.acid.zalan.do/acid-test-cluster configured
-2023-06-26T18:45:09+02:00  acid.zalan.do  postgresql     default     acid-test-cluster    Synced                       postgresql.acid.zalan.do/acid-test-cluster configured
+TIMESTAMP                  GROUP                KIND   NAMESPACE                  NAME    STATUS    HOOK  MESSAGE
+2023-06-26T18:44:36+02:00  acid.zalan.do  postgresql     default     acid-test-cluster  OutOfSync
+2023-06-26T18:45:07+02:00  acid.zalan.do  postgresql     default     acid-test-cluster  OutOfSync   
+postgresql.acid.zalan.do/acid-test-cluster configured
+2023-06-26T18:45:09+02:00  acid.zalan.do  postgresql     default     acid-test-cluster    Synced    
+postgresql.acid.zalan.do/acid-test-cluster configured
 
 Name:               argocd/postgres-deployment
 Project:            default
@@ -2315,7 +2335,32 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 
 \begin{frame}[fragile]{Accès client à la base de données}
 
-   WIP
+   \begin{itemize}
+      \item Le lien suivant décrit comment se logger à la base de données PostgreSQL: \url{https://github.com/zalando/postgres-operator/blob/master/docs/user.md#connect-to-postgresql}
+      \item Récupération du pod master:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+# get name of master pod of acid-minimal-cluster
+export PGMASTER=$(kubectl get pods \textbackslash
+-o jsonpath={.items..metadata.name} \textbackslash
+-l application=spilo,cluster-name=acid-minimal-cluster,spilo-role=master \textbackslash
+-n default)
+
+# set up port forward
+kubectl port-forward $PGMASTER 6432:5432 -n default
+\end{Verbatim}
+\end{tiny}
+      \item Connexion depuis un tunnel SSH:
+\begin{tiny}
+\begin{Verbatim}[commandchars=\\\{\}]
+export PGPASSWORD=$(kubectl get secret \textbackslash
+postgres.acid-minimal-cluster.credentials.postgresql.acid.zalan.do \textbackslash
+-o 'jsonpath={.data.password}' | base64 -d)
+export PGSSLMODE=require
+psql -U postgres -h localhost -p 6432
+\end{Verbatim}
+\end{tiny}
+   \end{itemize}
 
 \end{frame}
 
@@ -2323,7 +2368,7 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 
 \begin{frame}[fragile]{Point-in-time recovery PITR}
 
-   WIP
+   Vidéo partagée \textit{7-Postgres\_operator\_pitr.mkv}
 
 \end{frame}
 
@@ -2331,7 +2376,7 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 
 \begin{frame}[fragile]{Failover - Changement du nombre de pods}
 
-   WIP
+   Vidéo partagée \textit{6-Postgres\_operator\_failover\_podnumberchange.mkv}
 
 \end{frame}
 
@@ -2339,7 +2384,7 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 
 \begin{frame}[fragile]{Mise à jour mineure de PostgreSQL}
 
-   WIP
+   Vidéo partagée \textit{6-Postgres\_operator\_minorupgrade.mkv}
 
 \end{frame}
 
@@ -2347,7 +2392,7 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 
 \begin{frame}[fragile]{Mise à jour majeure de PostgreSQL}
 
-   WIP
+   Vidéo partagée \textit{6-Postgres\_operator\_major\_upgrade.mkv}
 
 \end{frame}
 
@@ -2371,14 +2416,14 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
    \item Le lien suivant décrit les commandes de déploiement: \url{https://github.com/prometheus-operator/kube-prometheus#quickstart}
    \item Les commandes suivantes décrivent le déploiement de l'opérateur \textbf{kube-prometheus}
    \begin{tiny}
-   \begin{Verbatim}[commandchars=\\\{\}]
+      \begin{Verbatim}[commandchars=\\\#\#]
       $ git clone https://github.com/prometheus-operator/kube-prometheus.git
       $ kubectl apply --server-side -f manifests/setup
    customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com serverside-applied
    \ldots
-      $ kubectl wait \
-        --for condition=Established \
-        --all CustomResourceDefinition \
+      $ kubectl wait \textbackslash
+        --for condition=Established \textbackslash
+        --all CustomResourceDefinition \textbackslash
         --namespace=monitoring
 customresourcedefinition.apiextensions.k8s.io/alertmanagerconfigs.monitoring.coreos.com condition met
 customresourcedefinition.apiextensions.k8s.io/alertmanagers.monitoring.coreos.com condition met
@@ -2565,7 +2610,10 @@ ssh -L 9095:10.106.57.137:9090 dgfip-k8s
    Dans un $1\ier{}$ temps, on met en place le classique port forward depuis le control plane:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
-$ export PGMASTER=$(kubectl get pods -o jsonpath={.items..metadata.name} -l application=spilo,cluster-name=acid-test-cluster,spilo-role=master -n default)
+$ export PGMASTER=$(kubectl get pods \textbackslash
+-o jsonpath={.items..metadata.name} \textbackslash
+-l application=spilo,cluster-name=acid-test-cluster,spilo-role=master \textbackslash
+-n default)
 $ kubectl port-forward $PGMASTER 6432:5432 -n default
 Forwarding from 127.0.0.1:6432 -> 5432
 Forwarding from [::1]:6432 -> 5432
@@ -2576,7 +2624,12 @@ Forwarding from [::1]:6432 -> 5432
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
-sudo docker run --net=host  -p 9187:9187  -e DATA_SOURCE_NAME="postgresql://postgres:*******@localhost:6432/postgres?sslmode=require"  -v /home/linagora/postgres_exporter.yml:/home/linagora/postgres_exporter.yml quay.io/prometheuscommunity/postgres-exporter --config.file="/home/linagora/postgres_exporter.yml" --log.level="debug"
+sudo docker run --net=host  -p 9187:9187 \textbackslash
+-e DATA_SOURCE_NAME="postgresql://postgres:*******@localhost:6432/postgres?sslmode=require" \textbackslash
+-v /home/linagora/postgres_exporter.yml:/home/linagora/postgres_exporter.yml \textbackslash
+quay.io/prometheuscommunity/postgres-exporter \textbackslash
+--config.file="/home/linagora/postgres_exporter.yml" \textbackslash
+--log.level="debug"
 \end{Verbatim}
 \end{tiny}
 
