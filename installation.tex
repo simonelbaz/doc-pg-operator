@@ -1,4 +1,4 @@
-\section{Installation}
+\section{Architecture}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -11,6 +11,10 @@
 \end{figure}
 
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Installation}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -419,7 +423,12 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/
 \begin{frame}[fragile]{Installation de \textbf{k9s}}
 
    Un outil pratique de visualisation d'un cluster kubernetes est: \textbf{k9s} (\url{https://k9scli.io/})\\
-   Le lien suivant permet de télécharger l'archive incluant le binaire: \url{https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz}
+   Le lien suivant \footnote{
+\begin{tcolorbox}
+   \tiny{\url{https://github.com/derailed/k9s/releases/download/v0.27.3/k9s_Linux_amd64.tar.gz}}
+\end{tcolorbox}
+   } permet de télécharger l'archive incluant le binaire.
+
 
 
 \end{frame}
@@ -660,6 +669,10 @@ dnumworker1   NotReady   <none>          53s   v1.26.2
 \end{tiny}
 
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Stockage}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -960,6 +973,10 @@ local-storage     kubernetes.io/no-provisioner   Delete          WaitForFirstCon
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Déploiement PostgreSQL}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Sélection des n\oe{}uds \textbf{PostgreSQL}}
 
    De manière similaire à l'opérateur Rook Ceph, il est possible de sélectionner les n\oe{}uds portant le pod PostgreSQL en se basant sur les labels Kubernetes.\\
@@ -1031,8 +1048,11 @@ index 8d197a75..56b32c34 100644
 
 Le storage class est maintenant déployé.\\
 Il devient possible d'appliquer l'opérateur PostgreSQL.\\
-Le lien suivant décrit les commandes à appliquer:\\
-\tiny{\url{https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md#deployment-options}}
+   Le lien suivant \footnote{
+\begin{tcolorbox}
+\tiny{\url{https://github.com/zalando/postgres-operator/blob/master/docs/quickstart.md\#deployment-options}}
+\end{tcolorbox}
+   } décrit les commandes à appliquer.
 
 \end{frame}
 
@@ -1070,7 +1090,7 @@ kubectl create -f manifests/api-service.yaml  # operator API to be used by UI
 
 \begin{frame}[fragile]{Accès à l'interface web}
    
-   Pour activer l'accès à l'interface web de l'opérateur PostgreSQL, veuillez la commande suivante sur le n\oe{}ud control plane:
+   Pour activer l'accès à l'interface web de l'opérateur PostgreSQL, veuillez entrer la commande suivante sur le n\oe{}ud control plane:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\{\}]
 $ kubectl port-forward svc/postgres-operator-ui 8081:80
@@ -1167,8 +1187,13 @@ acid-test-cluster   acid   15        2      1Gi      10m           100Mi        
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Stockage S3 - Minio}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Déploiement de \textbf{krew}}
 
+   L'opérateur Minio s'appuie sur le gestionnaire de paquets \textbf{krew}.\\
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
 (
@@ -1459,8 +1484,11 @@ dnumminioworker4   Ready    <none>          83m    v1.27.2   \ldots,\textbf{role
 \begin{frame}[fragile]{Utilisation de container en mode rootless dans OpenShift}
 
    \begin{itemize}
-\item L'URL suivante décrit la problèmatique d'utilisation de container dans un environnement rootless: \\
+      \item L'URL suivante décrit la problèmatique d'utilisation de container dans un environnement rootless \footnote{
+\begin{tcolorbox}
    \url{https://docs.bitnami.com/tutorials/running-non-root-containers-on-openshift} \\
+\end{tcolorbox}
+}
 \item Cette page fournit également un lien intéressant sur la sécurisation d'un cluster Kubernetes en se basant sur les \textbf{Pod Security Policies}.\\
 \item Le lien est le suivant:
    \url{https://docs.bitnami.com/tutorials/secure-kubernetes-cluster-psp/}.
@@ -1528,6 +1556,10 @@ securityContext:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Déploiement continu}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Installation d'ArgoCD}
 
 Le lien suivant décrit l'installation d'ArgoCD: \url{https://argo-cd.readthedocs.io/en/stable/#quick-start}
@@ -1545,7 +1577,13 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 \begin{frame}[fragile]{Installation de la CLI ArgoCD}
 
-Le lien suivant décrit l'installation de la CLI ArgoCD: \url{https://argo-cd.readthedocs.io/en/stable/cli_installation/#download-with-curl}
+   Le lien suivant \footnote{
+      \begin{tcolorbox}
+ \url{https://argo-cd.readthedocs.io/en/stable/cli_installation/\#download-with-curl}
+      \end{tcolorbox}
+   }
+   décrit l'installation de la CLI ArgoCD.\\
+   Les commandes d'installation sont:\\
 
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
@@ -1562,8 +1600,14 @@ rm argocd-linux-amd64
 
 \begin{frame}[fragile]{Activation de l'accès au serveur d'API d'ArgoCD}
 
-Le lien suivant décrit les différentes méthodes d'accès au serveur d'API d'ArgoCD: \url{https://argo-cd.readthedocs.io/en/stable/getting_started/#3-access-the-argo-cd-api-server}
+   Le lien suivant \footnote{
+      \begin{tcolorbox}
+      \tiny{\url{https://argo-cd.readthedocs.io/en/stable/getting_started/\#3-access-the-argo-cd-api-server}}
+      \end{tcolorbox}
+   }
+   décrit les différentes méthodes d'accès au serveur d'API d'ArgoCD:
 
+   Les commandes d'installation sont:\\
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
 $ kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
@@ -1664,7 +1708,20 @@ argocd app create postgres-operator \
 --dest-namespace default
 \end{Verbatim}
 \end{tiny}
-   \item Cette commande est décrite en détail dans la documentation  officielle: \url{https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_app_create/}
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Ajout de l'application postgres-operator dans ArgoCD}
+
+\begin{itemize}
+   \item Cette commande est décrite en détail dans la documentation  officielle \footnote{
+         \begin{tcolorbox}
+         \url{https://argo-cd.readthedocs.io/en/stable/user-guide/commands/argocd_app_create/}
+         \end{tcolorbox}
+      }
    \item Pour information, le dépôt ci-dessus est un fork du dépôt officiel
    \item L'ensemble des modifications réalisées pour le POC sont tracées dans la branche \textit{poc-argocd}
 \end{itemize}
@@ -2135,8 +2192,13 @@ Events:                 <none>
 
 \begin{frame}[fragile]{StatefulSets}
 
-   La définition officielle des StatefulSets est disponible à l'URL suivante: \url{https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/}
-   Les Pods portants l'image Spilo sont déployés en se basant sur des statefulsets:
+   \begin{itemize}
+      \item La définition officielle des StatefulSets est disponible à l'URL suivante \footnote{
+      \begin{tcolorbox}
+   \url{https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/}
+      \end{tcolorbox}
+}.
+   \item Les Pods portants l'image Spilo sont déployés en se basant sur des statefulsets:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\&\#\#]
 $ kubectl get statefulsets
@@ -2144,6 +2206,7 @@ NAME                READY   AGE
 acid-test-cluster   2/2     88d
 \end{Verbatim}
 \end{tiny}
+   \end{itemize}
 
 \end{frame}
 
@@ -2253,9 +2316,14 @@ Events:          <none>
 
 \begin{frame}[fragile]{Traitement des statefulsets par Argo}
 
-   A priori, le traitement des statefulsets peut avoir des limitations:
-   \url{https://argo-cd.readthedocs.io/en/stable/faq/#why-is-my-application-stuck-in-progressing-state}
-   Cette limitation a été corrigée
+   \begin{itemize}
+   \item A priori, le traitement des statefulsets peut avoir des limitations \footnote{
+      \begin{tcolorbox}
+         \tiny{\url{https://argo-cd.readthedocs.io/en/stable/faq/\#why-is-my-application-stuck-in-progressing-state}}
+      \end{tcolorbox}
+}
+   \item Cette limitation a été corrigée
+   \end{itemize}
 
 \end{frame}
 
@@ -2336,7 +2404,11 @@ acid.zalan.do  postgresql  default    acid-test-cluster  Synced                p
 \begin{frame}[fragile]{Accès client à la base de données}
 
    \begin{itemize}
-      \item Le lien suivant décrit comment se logger à la base de données PostgreSQL: \url{https://github.com/zalando/postgres-operator/blob/master/docs/user.md#connect-to-postgresql}
+      \item Le lien suivant décrit comment se logger à la base de données PostgreSQL \footnote{
+            \begin{tcolorbox}
+            \tiny{\url{https://github.com/zalando/postgres-operator/blob/master/docs/user.md\#connect-to-postgresql}}
+            \end{tcolorbox}
+         }
       \item Récupération du pod master:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -2350,6 +2422,15 @@ export PGMASTER=$(kubectl get pods \textbackslash
 kubectl port-forward $PGMASTER 6432:5432 -n default
 \end{Verbatim}
 \end{tiny}
+   \end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Accès client à la base de données}
+
+   \begin{itemize}
       \item Connexion depuis un tunnel SSH:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -2398,6 +2479,10 @@ psql -U postgres -h localhost -p 6432
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Supervision}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[fragile]{Supervision du cluster k8s - Prometheus}
 
 \begin{itemize}
@@ -2413,7 +2498,20 @@ psql -U postgres -h localhost -p 6432
 \begin{frame}[fragile]{Déploiement de \textbf{kube-prometheus}}
 
 \begin{itemize}
-   \item Le lien suivant décrit les commandes de déploiement: \url{https://github.com/prometheus-operator/kube-prometheus#quickstart}
+   \item Le lien suivant décrit les commandes de déploiement \footnote{
+         \begin{tcolorbox}
+         \tiny{\url{https://github.com/prometheus-operator/kube-prometheus\#quickstart}}
+         \end{tcolorbox}
+      }
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile]{Déploiement de \textbf{kube-prometheus}}
+
+\begin{itemize}
    \item Les commandes suivantes décrivent le déploiement de l'opérateur \textbf{kube-prometheus}
    \begin{tiny}
       \begin{Verbatim}[commandchars=\\\#\#]
@@ -2433,7 +2531,7 @@ customresourcedefinition.apiextensions.k8s.io/analysisruns.argoproj.io condition
    \ldots
    \end{Verbatim}
    \end{tiny}
-\item la dernière commande s'est terminée en erreur et a nécessité un double lancement
+   \item la dernière commande s'est terminée en erreur et a nécessité un double lancement
 \end{itemize}
 
 \end{frame}
@@ -2461,7 +2559,11 @@ node-exporter   10        10        10      10           10          kubernetes.
 \begin{frame}[fragile]{Accès à l'UI de Prometheus}
 
 \begin{itemize}
-\item le lien suivant décrit le mode opératoire pour accéder à l'UI de Prometheus: \url{https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/access-ui.md}
+   \item le lien suivant décrit le mode opératoire pour accéder à l'UI de Prometheus \footnote{
+         \begin{tcolorbox}
+         \tiny{\url{https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/access-ui.md}}
+         \end{tcolorbox}
+      }
 \item Depuis le n\oe{}ud control plane, ouvrir un port forward:
 \begin{tiny}
 \begin{Verbatim}[commandchars=\\\{\}]

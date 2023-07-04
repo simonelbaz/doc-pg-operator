@@ -1,6 +1,6 @@
 %\documentclass[aspectratio=43]{beamer}
 %\documentclass[aspectratio=1610]{beamer}
-\RequirePackage[hyphens]{url}
+%\RequirePackage[hyphens]{url}
 \documentclass[aspectratio=169]{beamer}
 
 % @IMP@ \usepackage{pgfpages}
@@ -10,34 +10,37 @@
 %\PassOptionsToPackage{hyphens,colorlinks,urlcolor=blue}{hyperref}\usepackage{hyperref}
 %\usepackage[T1,hyphens,spaces]{url}
 %\def\UrlBreaks{\do\-\do\#\do\<\do\:\do\/}
+%\def\UrlBigBreaks{\do\-\do\#\do\(\do\[\do\<\do\:\do\_}
+%\def\UrlBreaks{\do\-\do\#\do\(\do\[\do\<\do\:\do\_}
 
 \usepackage[english,french]{babel}
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{microtype}
+%\usepackage[utf8]{inputenc}
 
-\usepackage{lmodern}
-
-\usepackage{amsmath}
-\usepackage{array}
-\usepackage{bookmark}
-\usepackage{graphicx}
-\usepackage{svg}
-\usepackage{keystroke}
-\usepackage{marvosym}
-\usepackage{siunitx}
-\usepackage{tabularx}
-\usepackage{tabulary}
-\usepackage{tikz}
-\usepackage{xspace}
+%\usepackage{microtype}
+%
+%\usepackage{lmodern}
+%
+%\usepackage{amsmath}
+%\usepackage{array}
+%\usepackage{bookmark}
+%\usepackage{graphicx}
+%\usepackage{svg}
+%\usepackage{keystroke}
+%\usepackage{marvosym}
+%\usepackage{siunitx}
+%\usepackage{tabularx}
+%\usepackage{tabulary}
+%\usepackage{tikz}
+%\usepackage{xspace}
 \usepackage{fancyvrb}
-\usepackage{mdframed}
+%\usepackage{mdframed}
 \usepackage{tcolorbox}
-\usepackage{listings}
+%\usepackage{listings}
 \usepackage{spverbatim}
+%\usepackage{tgcursor}
 
 \newcommand\userinput[1]{\textbf{#1}}
-\usepackage{tgcursor}
 
 %\usepackage{formation}
 
@@ -50,20 +53,20 @@
 
 \title{PostgreSQL}
 \subtitle{Déploiement de l'opérateur PostgreSQL de Zalando}
-\author{Simon ELBAZ (selbaz@linagora.com)}
+\author{Simon ELBAZ (selbaz@linagora.com / ossa@linagora.com)}
 \date{27 février 2023}
 
 %\setbeameroption{show notes}
 
 % array
 
-\setlength{\extrarowheight}{2pt}
+%\setlength{\extrarowheight}{2pt}
 
 % babel
 
-\frenchbsetup{og=«,fg=»}
+%\frenchbsetup{og=«,fg=»}
 
-\newcommand{\anglais}[1]{\textit{\foreignlanguage{english}{#1}}}
+%\newcommand{\anglais}[1]{\textit{\foreignlanguage{english}{#1}}}
 
 % graphicx
 
@@ -71,20 +74,20 @@
 
 % marvosym
 
-\newcommand{\curseur}{\Rectsteel}
+%\newcommand{\curseur}{\Rectsteel}
 
 % siunitx
 
-\sisetup
-{
-	binary-units	= true ,
-}
-
-\DeclareSIUnit{\octet}{o}
+%\sisetup
+%{
+%	binary-units	= true ,
+%}
+%
+%\DeclareSIUnit{\octet}{o}
 
 % tikz
 
-\usetikzlibrary{calc,decorations.pathmorphing}
+%\usetikzlibrary{calc,decorations.pathmorphing}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -113,15 +116,15 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section*{Bibliographie}
+%\section*{Bibliographie}
 
-\pdfbookmark[2]{Bibliographie}{bibliographie}
+%\pdfbookmark[2]{Bibliographie}{bibliographie}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section*{Webographie}
+%\section*{Webographie}
 
-\pdfbookmark[2]{Webographie}{webographie}
+%\pdfbookmark[2]{Webographie}{webographie}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -141,7 +144,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section*{Conclusion}
+\section*{Fin du document}
 
 \pdfbookmark[2]{Conclusion}{conclusion}
 
