@@ -37,16 +37,22 @@
 %\usepackage{mdframed}
 \usepackage{tcolorbox}
 %\usepackage{listings}
-\usepackage{spverbatim}
+%\usepackage{spverbatim}
 %\usepackage{tgcursor}
-
-\newcommand\userinput[1]{\textbf{#1}}
+\usepackage{bookmark}
 
 %\usepackage{formation}
+\definecolor{redlina}{HTML}{c61d42}
+\newcommand\userinput[1]{\textbf{#1}}
 
 % beamer
 %\setbeamertemplate{itemize/enumerate body begin}{\large}
 %\setbeamertemplate{itemize/enumerate subbody begin}{\tiny}
+\setbeamercolor{title}{fg=black}
+\setbeamercolor{subtitle}{fg=black}
+\setbeamercolor{author}{fg=black}
+\setbeamercolor{date}{fg=black}
+\setbeamercolor{background canvas}{bg=redlina}
 
 %\usetheme[formation]{Linagora}
 \usetheme[progressbar=frametitle]{metropolis}
@@ -56,6 +62,10 @@
 \author{Simon ELBAZ (selbaz@linagora.com / ossa@linagora.com)}
 \date{27 février 2023}
 
+\setbeamertemplate{background}{
+\includegraphics[width=8cm,height=8cm]{os_logo.png}
+\includegraphics[]{linagora_logo.png}
+}
 %\setbeameroption{show notes}
 
 % array
@@ -144,6 +154,11 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\setbeamercolor{background canvas}{bg=redlina}
+\setbeamertemplate{background}{
+\includegraphics[width=8cm,height=8cm]{os_logo.png}
+\includegraphics[]{linagora_logo.png}
+}
 \section*{Fin du document}
 
 \pdfbookmark[2]{Conclusion}{conclusion}
